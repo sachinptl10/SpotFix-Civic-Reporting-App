@@ -1,8 +1,8 @@
 # SpotFix V2 — Citizen ↔ Government Civic Issue Management & Approval System
 
-SpotFix V2 is a complete civic issue reporting and municipal management platform built with **React Native**, **Expo (SDK 54)**, **Expo Router**, and **JavaScript / JSX only**, powered by a **Node.js, Express, MongoDB, and Mongoose** REST backend.
+SpotFix V2 is an enterprise-grade civic issue reporting and municipal management platform built with **React Native**, **Expo (SDK 54)**, **Expo Router**, and **JavaScript / JSX only**, powered by a hardened **Node.js, Express, MongoDB, and Mongoose** REST backend.
 
-V2 introduces a two-tier **Citizen ↔ Government workflow** featuring role-based authentication, a government triage queue, review notes, mandatory rejection reasons, resolution proof photo uploads, an immutable audit trail (`statusHistory`), an in-app citizen notification center (`Alerts`), and comprehensive municipal analytics.
+V2 features a two-tier **Citizen ↔ Government workflow** with role-based authentication, a municipal triage queue, review notes, mandatory rejection reasons, resolution proof photo uploads, an immutable audit trail (`statusHistory`), an in-app citizen notification center (`Alerts`), geospatial 2dsphere proximity search, and comprehensive municipal analytics.
 
 ---
 
@@ -66,7 +66,7 @@ Every status change appends to the `statusHistory` array on the Report document:
 
 ---
 
-## 3. Technology Stack
+## 3. Technology Stack & Backend Hardening
 
 ### Mobile Frontend
 - **Framework**: React Native 0.81.5 with Expo SDK 54 (~54.0.37)
@@ -81,12 +81,24 @@ Every status change appends to the `statusHistory` array on the Report document:
   - `@react-native-async-storage/async-storage`: Offline reports cache and theme preference.
   - `expo-contacts`: Local contact selection and native Phone, SMS, and Email deep linking.
 
-### Backend REST API
+### Hardened Backend REST API
 - **Runtime**: Node.js v18+ with Express.js
 - **Database**: MongoDB with Mongoose ODM
-- **Authentication**: JWT (JSON Web Tokens) with embedded `{ id, role }`
-- **File Uploads**: Multer with file type and 30MB size validation
-- **Security**: Password hashing via `bcryptjs`, role-based middleware (`requireRole('government')`), and ownership verification.
+  - **Connection Pooling**: Configured with `maxPoolSize: 10`, `minPoolSize: 2`, `serverSelectionTimeoutMS: 5000`.
+  - **Geospatial Indexing**: Real GeoJSON Point schema with `2dsphere` index enabling high-speed `$near` proximity searches.
+  - **Compound Indexes**: Optimized for status, user, category, and full-text search.
+- **Security & Attack Mitigation**:
+  - **Helmet**: Secures HTTP headers (`nosniff`, `cross-origin`, hide powered by).
+  - **Rate Limiting (`express-rate-limit`)**:
+    - General API limiter: 300 requests / 15 mins per IP.
+    - Auth limiter: 20 attempts / 15 mins to mitigate brute-force password guessing.
+  - **NoSQL Injection Prevention (`express-mongo-sanitize`)**: Strips dangerous MongoDB operators (`$gt`, `$ne`, etc.) from request bodies and query parameters.
+  - **CORS Whitelist**: Secure origin validation preventing unauthorized cross-origin requests.
+  - **File Upload Security**: Cryptographically random 12-byte filenames (`crypto.randomBytes`), MIME/extension whitelist, and directory traversal protection.
+- **Diagnostics & Monitoring**:
+  - `GET /api/health`: Database ping latency check, status, uptime.
+  - `GET /api/health/diagnostics`: Memory utilization (`rss`, `heapUsed`), Node version, environment.
+  - **Graceful Shutdown**: Intercepts `SIGINT`/`SIGTERM` to safely finish in-flight requests and disconnect from MongoDB.
 
 ---
 
@@ -146,32 +158,20 @@ SpotFix/
 │   ├── ReportContext.jsx       # Reports feed, offline caching & pagination
 │   └── ToastContext.jsx        # In-app floating toast notifications
 │
-├── hooks/
-│   ├── useAuth.js
-│   ├── useNotifications.js
-│   ├── useReports.js
-│   ├── useLocation.js
-│   ├── useContacts.js
-│   ├── useTheme.js
-│   └── useDebounce.js
-│
-├── theme/
-│   ├── colors.js               # Light & Dark color palettes
-│   ├── spacing.js              # Border radii & padding scales
-│   └── typography.js           # Font scale
-│
 └── backend/
-    ├── server.js               # Express entrypoint
-    ├── config/db.js            # MongoDB connection
+    ├── server.js               # Express entrypoint with helmet, morgan, rate-limiting
+    ├── config/db.js            # MongoDB connection pooling, ping check & graceful disconnect
     ├── models/
     │   ├── User.js             # User model with role ('citizen' | 'government')
-    │   ├── Report.js           # Report model with reportNumber, statusHistory, priority
+    │   ├── Report.js           # Report model with GeoJSON 2dsphere location, audit trail
     │   └── Notification.js     # Citizen notifications model
     ├── services/
     │   └── reportWorkflowService.js # Centralized state machine & reportNumber generator
     ├── middleware/
     │   ├── auth.js             # protect, requireAuth, requireRole
-    │   └── upload.js           # Multer configuration
+    │   ├── security.js         # Helmet, rate-limiters, mongo-sanitize, CORS
+    │   ├── validator.js        # Input validation & query parameter sanitization
+    │   └── upload.js           # Multer configuration with cryptographically secure filenames
     ├── controllers/
     │   ├── authController.js
     │   ├── reportController.js
@@ -182,6 +182,12 @@ SpotFix/
     │   ├── reportRoutes.js
     │   ├── notificationRoutes.js
     │   └── analyticsRoutes.js
+    ├── utils/
+    │   ├── AppError.js         # Custom operational error class
+    │   ├── asyncHandler.js     # Async handler wrapper
+    │   ├── errorHandler.js     # Centralized, sanitized production error handler
+    │   ├── fileUtil.js         # Path-validated safe file deletion
+    │   └── logger.js           # Structured console logger
     └── scripts/
         └── seedGovernmentUser.js # Government account seeder
 ```
@@ -201,7 +207,7 @@ SpotFix/
    cd backend
    npm install
    ```
-2. Configure `.env` (a template is provided in `.env.example`):
+2. Configure `.env`:
    ```env
    PORT=5000
    MONGO_URI=mongodb://127.0.0.1:27017/spotfix
@@ -241,7 +247,13 @@ SpotFix/
 
 ## 6. REST API Reference
 
-### Authentication
+### System & Health Diagnostics
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/health` | Public | Real-time health status with database ping latency |
+| `GET` | `/api/health/diagnostics` | Public | Process memory metrics (heap, RSS), Node version, uptime |
+
+### Authentication (Rate Limited)
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
 | `POST` | `/api/auth/register` | Public | Register citizen account (`role: 'citizen'`) |
@@ -252,7 +264,8 @@ SpotFix/
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
 | `POST` | `/api/reports` | Citizen | Submit new issue report (`status: 'pending'`, generates `#SP-XXXXX`) |
-| `GET` | `/api/reports/mine` | Citizen | View authenticated citizen's submitted reports |
+| `GET` | `/api/reports/nearby` | Private | Find civic reports within radius (meters) using 2dsphere indexing |
+| `GET` | `/api/reports/mine` | Citizen | View authenticated citizen's submitted reports (paginated) |
 | `GET` | `/api/reports/:id` | Private | View report details (ownership enforced for citizens) |
 | `GET` | `/api/notifications` | Citizen | Get notification feed |
 | `GET` | `/api/notifications/unread-count`| Citizen | Get count of unread notifications |
@@ -278,6 +291,7 @@ SpotFix/
 | :--- | :---: | :---: | :--- |
 | Submit New Report | ✅ | ❌ | Server sets `user = req.user._id` |
 | View Own Reports | ✅ | ❌ | Scoped to authenticated user |
+| Proximity Search (`/nearby`) | ✅ | ✅ | GeoJSON `$near` within specified radius |
 | View Government Queue | ❌ | ✅ | `403 Forbidden` if citizen |
 | Mark Under Review | ❌ | ✅ | `403 Forbidden` if citizen |
 | Approve Report | ❌ | ✅ | `403 Forbidden` if citizen |
@@ -287,19 +301,3 @@ SpotFix/
 | View Alerts & Unread Badge | ✅ | ❌ | Citizen-facing notification center |
 | View Municipal Analytics | ❌ | ✅ | `403 Forbidden` if citizen |
 | Arbitrary Status Jumping | ❌ | ❌ | State machine returns `409 Conflict` |
-
----
-
-## 8. Troubleshooting & Common Questions
-
-1. **Mobile device cannot connect to backend**:
-   - Ensure your phone and development computer are connected to the same Wi-Fi network.
-   - Verify `SERVER_HOST` in `utils/constants.js` points to your computer's local IP (e.g. `http://192.168.1.X:5000`), not `localhost`.
-   - Ensure your firewall allows inbound traffic on port 5000.
-
-2. **Government login credentials**:
-   - Run `npm run seed:government` in the `backend/` directory.
-   - Login with `gov@spotfix.gov` and password `GovSpotFix@2026`.
-
-3. **Dependency validation**:
-   - Run `npx expo-doctor` in the root folder. All 18 checks should pass without errors.

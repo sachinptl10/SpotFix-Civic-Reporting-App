@@ -101,6 +101,19 @@ const reportSchema = new mongoose.Schema(
       min: [-180, 'Longitude must be between -180 and 180'],
       max: [180, 'Longitude must be between -180 and 180'],
     },
+    // GeoJSON Point for MongoDB geospatial queries ($near, $geoWithin)
+    location: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point',
+      },
+      coordinates: {
+        type: [Number], // [longitude, latitude] GeoJSON order
+        required: true,
+        default: [0, 0],
+      },
+    },
     address: {
       type: String,
       default: '',
@@ -151,9 +164,22 @@ const reportSchema = new mongoose.Schema(
   }
 );
 
-// Indexes for high performance triage and government queues
+// Pre-save hook: automatically sync GeoJSON coordinates [longitude, latitude]
+reportSchema.pre('save', function (next) {
+  if (typeof this.latitude === 'number' && typeof this.longitude === 'number') {
+    this.location = {
+      type: 'Point',
+      coordinates: [this.longitude, this.latitude],
+    };
+  }
+  next();
+});
+
+// High performance compound indexes
+reportSchema.index({ location: '2dsphere' });
 reportSchema.index({ status: 1, createdAt: -1 });
-reportSchema.index({ user: 1, createdAt: -1 });
+reportSchema.index({ status: 1, priority: 1, createdAt: -1 });
+reportSchema.index({ user: 1, status: 1, createdAt: -1 });
 reportSchema.index({ category: 1, priority: 1, createdAt: -1 });
 reportSchema.index({
   title: 'text',

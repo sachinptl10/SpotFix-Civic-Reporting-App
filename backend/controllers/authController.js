@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const AppError = require('../utils/AppError');
+const asyncHandler = require('../utils/asyncHandler');
 
 // Helper to generate JWT with identity and role
 const generateToken = (user) => {
@@ -19,175 +21,98 @@ const generateToken = (user) => {
 // @desc    Register a new citizen user
 // @route   POST /api/auth/register
 // @access  Public
-const register = async (req, res, next) => {
-  try {
-    const { name, email, password, confirmPassword } = req.body;
-    const errors = {};
+const register = asyncHandler(async (req, res) => {
+  const { name, email, password } = req.body;
 
-    if (!name || name.trim().length === 0) {
-      errors.name = 'Full name is required.';
-    } else if (name.trim().length < 2) {
-      errors.name = 'Full name must be at least 2 characters.';
-    }
-
-    if (!email || email.trim().length === 0) {
-      errors.email = 'Email address is required.';
-    } else {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email.trim())) {
-        errors.email = 'Please provide a valid email address.';
-      }
-    }
-
-    if (!password) {
-      errors.password = 'Password is required.';
-    } else if (password.length < 6) {
-      errors.password = 'Password must be at least 6 characters long.';
-    }
-
-    if (confirmPassword !== undefined && password !== confirmPassword) {
-      errors.confirmPassword = 'Passwords do not match.';
-    }
-
-    if (Object.keys(errors).length > 0) {
-      return res.status(422).json({
-        success: false,
-        message: 'Validation failed.',
-        errors,
-      });
-    }
-
-    // Check if user already exists
-    const userExists = await User.findOne({ email: email.toLowerCase().trim() });
-    if (userExists) {
-      return res.status(409).json({
-        success: false,
-        message: 'An account with this email already exists.',
-        errors: { email: 'Email is already registered.' },
-      });
-    }
-
-    // Always create as citizen role for public self-registration (security rule)
-    const user = await User.create({
-      name: name.trim(),
-      email: email.toLowerCase().trim(),
-      password,
-      role: 'citizen',
+  // Check if user already exists
+  const userExists = await User.findOne({ email });
+  if (userExists) {
+    throw new AppError('An account with this email address already exists.', 409, {
+      email: 'Email is already registered.',
     });
-
-    const token = generateToken(user);
-
-    res.status(201).json({
-      success: true,
-      message: 'Account registered successfully.',
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        createdAt: user.createdAt,
-      },
-    });
-  } catch (error) {
-    next(error);
   }
-};
+
+  // Always create with 'citizen' role for public self-registration (security rule)
+  const user = await User.create({
+    name,
+    email,
+    password,
+    role: 'citizen',
+  });
+
+  const token = generateToken(user);
+
+  res.status(201).json({
+    success: true,
+    message: 'Account registered successfully.',
+    token,
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      createdAt: user.createdAt,
+    },
+  });
+});
 
 // @desc    Login user & get token
 // @route   POST /api/auth/login
 // @access  Public
-const login = async (req, res, next) => {
-  try {
-    const { email, password } = req.body;
-    const errors = {};
+const login = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
 
-    if (!email || email.trim().length === 0) {
-      errors.email = 'Email address is required.';
-    }
+  const user = await User.findOne({ email }).select('+password');
 
-    if (!password) {
-      errors.password = 'Password is required.';
-    }
-
-    if (Object.keys(errors).length > 0) {
-      return res.status(422).json({
-        success: false,
-        message: 'Validation failed.',
-        errors,
-      });
-    }
-
-    const user = await User.findOne({ email: email.toLowerCase().trim() }).select('+password');
-
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password. Please check your credentials.',
-      });
-    }
-
-    const isMatch = await user.matchPassword(password);
-    if (!isMatch) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password. Please check your credentials.',
-      });
-    }
-
-    if (!user.isActive) {
-      return res.status(403).json({
-        success: false,
-        message: 'Your account has been deactivated.',
-      });
-    }
-
-    const token = generateToken(user);
-
-    res.status(200).json({
-      success: true,
-      message: 'Login successful.',
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role || 'citizen',
-        createdAt: user.createdAt,
-      },
-    });
-  } catch (error) {
-    next(error);
+  if (!user) {
+    throw new AppError('Invalid email or password. Please check your credentials.', 401);
   }
-};
+
+  const isMatch = await user.matchPassword(password);
+  if (!isMatch) {
+    throw new AppError('Invalid email or password. Please check your credentials.', 401);
+  }
+
+  if (!user.isActive) {
+    throw new AppError('Your account has been deactivated. Please contact municipal support.', 403);
+  }
+
+  const token = generateToken(user);
+
+  res.status(200).json({
+    success: true,
+    message: 'Login successful.',
+    token,
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role || 'citizen',
+      createdAt: user.createdAt,
+    },
+  });
+});
 
 // @desc    Get current user profile
 // @route   GET /api/auth/profile or /api/auth/me
 // @access  Private
-const getProfile = async (req, res, next) => {
-  try {
-    const user = await User.findById(req.user._id);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User profile not found.',
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role || 'citizen',
-        createdAt: user.createdAt,
-      },
-    });
-  } catch (error) {
-    next(error);
+const getProfile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+  if (!user) {
+    throw new AppError('User profile not found.', 404);
   }
-};
+
+  res.status(200).json({
+    success: true,
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role || 'citizen',
+      createdAt: user.createdAt,
+    },
+  });
+});
 
 module.exports = {
   register,

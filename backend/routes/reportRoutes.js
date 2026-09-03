@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {
   createReport,
+  getNearbyReports,
   getMyReports,
   getReports,
   getReportById,
@@ -16,18 +17,26 @@ const {
 } = require('../controllers/reportController');
 const { protect, requireRole } = require('../middleware/auth');
 const upload = require('../middleware/upload');
+const {
+  validateReportInput,
+  validateNearbyInput,
+  sanitizePagination,
+} = require('../middleware/validator');
 
-// All report routes require authentication
+// All report operations require authentication
 router.use(protect);
 
+// Geospatial issue discovery near coordinates
+router.get('/nearby', validateNearbyInput, getNearbyReports);
+
 // Citizen queue & statistics
-router.get('/mine', getMyReports);
+router.get('/mine', sanitizePagination, getMyReports);
 router.get('/stats', getReportStats);
 
-// Main report submission & triage queue
+// Main report creation & triage queue
 router.route('/')
-  .post(upload.single('image'), createReport)
-  .get(getReports);
+  .post(upload.single('image'), validateReportInput, createReport)
+  .get(sanitizePagination, getReports);
 
 // Government workflow actions (Strictly require government role)
 router.patch('/:id/review', requireRole('government'), markUnderReview);
