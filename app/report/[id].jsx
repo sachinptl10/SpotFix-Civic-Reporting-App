@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
   Image,
   ScrollView,
+  TouchableOpacity,
   StyleSheet,
   Alert,
 } from 'react-native';
@@ -15,6 +16,9 @@ import { useTheme } from '../../theme/ThemeContext';
 import useToast from '../../hooks/useToast';
 import reportService from '../../services/reportService';
 import StatusBadge from '../../components/StatusBadge';
+import PriorityBadge from '../../components/PriorityBadge';
+import StatusTimeline from '../../components/StatusTimeline';
+import ResolutionProofCard from '../../components/ResolutionProofCard';
 import CustomButton from '../../components/CustomButton';
 import LoadingState from '../../components/LoadingState';
 import ErrorState from '../../components/ErrorState';
@@ -33,16 +37,7 @@ export default function ReportDetailsScreen() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const cached = reports.find((r) => (r._id || r.id) === id);
-    if (cached) {
-      setReport(cached);
-      setIsLoading(false);
-    }
-    loadReportDetails();
-  }, [id]);
-
-  const loadReportDetails = async () => {
+  const loadReportDetails = useCallback(async () => {
     try {
       const response = await reportService.getReportById(id);
       if (response && response.report) {
@@ -56,7 +51,16 @@ export default function ReportDetailsScreen() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    const cached = reports.find((r) => (r._id || r.id) === id);
+    if (cached) {
+      setReport(cached);
+      setIsLoading(false);
+    }
+    loadReportDetails();
+  }, [id, reports, loadReportDetails]);
 
   const handleEdit = () => {
     router.push(`/edit/${id}`);
@@ -120,6 +124,7 @@ export default function ReportDetailsScreen() {
   };
 
   const isVideo = report?.mediaType === 'video';
+  const isPending = report?.status === 'pending';
 
   return (
     <ScrollView
@@ -156,6 +161,12 @@ export default function ReportDetailsScreen() {
         <View style={styles.heroBadgeOverlay}>
           <StatusBadge status={report?.status} size="md" />
         </View>
+
+        {report?.priority && (
+          <View style={styles.heroPriorityOverlay}>
+            <PriorityBadge priority={report.priority} size="sm" />
+          </View>
+        )}
       </View>
 
       {/* Main Details Card */}
@@ -171,19 +182,30 @@ export default function ReportDetailsScreen() {
           },
         ]}
       >
-        {/* Category & Date */}
+        {/* Report # and Category Row */}
         <View style={styles.metaRow}>
-          <View style={[styles.categoryTag, { backgroundColor: colors.surfaceSubtle, borderRadius: borderRadius.full }]}>
-            <MaterialCommunityIcons
-              name={categoryMeta.icon}
-              size={16}
-              color={categoryMeta.color}
-              style={{ marginRight: 6 }}
-            />
-            <Text style={[styles.categoryText, { color: categoryMeta.color, fontSize: fontSizes.xs }]}>
-              {categoryMeta.label}
-            </Text>
+          <View style={styles.leftMeta}>
+            <View style={[styles.categoryTag, { backgroundColor: colors.surfaceSubtle, borderRadius: borderRadius.full }]}>
+              <MaterialCommunityIcons
+                name={categoryMeta.icon}
+                size={16}
+                color={categoryMeta.color}
+                style={{ marginRight: 6 }}
+              />
+              <Text style={[styles.categoryText, { color: categoryMeta.color, fontSize: fontSizes.xs }]}>
+                {categoryMeta.label}
+              </Text>
+            </View>
+
+            {report?.reportNumber ? (
+              <View style={styles.refTag}>
+                <Text style={[styles.refText, { color: colors.primary, fontSize: fontSizes.xs }]}>
+                  #{report.reportNumber}
+                </Text>
+              </View>
+            ) : null}
           </View>
+
           <Text style={[styles.dateText, { color: colors.textMuted, fontSize: fontSizes.xs }]}>
             {formatDate(report?.createdAt)}
           </Text>
@@ -193,6 +215,54 @@ export default function ReportDetailsScreen() {
         <Text style={[styles.title, { color: colors.textPrimary, fontSize: fontSizes.xl }]}>
           {report?.title}
         </Text>
+
+        {/* Government Review Note Notice */}
+        {report?.reviewNote ? (
+          <View
+            style={[
+              styles.reviewNoteBox,
+              {
+                backgroundColor: report.status === 'rejected' ? '#FEF2F2' : '#F0F9FF',
+                borderColor: report.status === 'rejected' ? '#FECACA' : '#BAE6FD',
+                borderRadius: borderRadius.md,
+              },
+            ]}
+          >
+            <View style={styles.noteHeader}>
+              <MaterialCommunityIcons
+                name={report.status === 'rejected' ? 'alert-circle' : 'shield-account'}
+                size={16}
+                color={report.status === 'rejected' ? '#EF4444' : '#0284C7'}
+              />
+              <Text
+                style={[
+                  styles.noteTitle,
+                  { color: report.status === 'rejected' ? '#991B1B' : '#0369A1' },
+                ]}
+              >
+                {report.status === 'rejected' ? 'Government Rejection Notice:' : 'Government Review Note:'}
+              </Text>
+            </View>
+            <Text
+              style={[
+                styles.noteBody,
+                { color: report.status === 'rejected' ? '#7F1D1D' : '#0F172A' },
+              ]}
+            >
+              {report.reviewNote}
+            </Text>
+          </View>
+        ) : null}
+
+        {/* Resolution Proof Card if Resolved */}
+        {report?.status === 'resolved' && (
+          <ResolutionProofCard
+            resolvedImageUrl={report.resolvedImageUrl}
+            resolutionNote={report.resolutionNote}
+            resolvedAt={report.resolvedAt}
+            reviewedBy={report.reviewedBy}
+          />
+        )}
 
         {/* Description */}
         <Text style={[styles.sectionHeading, { color: colors.textSecondary, fontSize: fontSizes.xs }]}>
@@ -253,18 +323,29 @@ export default function ReportDetailsScreen() {
             </View>
           )}
         </View>
+
+        {/* Status Audit Timeline */}
+        <Text style={[styles.sectionHeading, { color: colors.textSecondary, fontSize: fontSizes.xs }]}>
+          Status Timeline & Audit Trail
+        </Text>
+        <StatusTimeline
+          statusHistory={report?.statusHistory || []}
+          currentStatus={report?.status}
+        />
       </View>
 
       {/* Action Buttons: Edit and Delete */}
       <View style={[styles.buttonRow, { paddingHorizontal: spacing.lg, gap: spacing.sm }]}>
-        <CustomButton
-          title="Edit Report"
-          onPress={handleEdit}
-          variant="secondary"
-          size="lg"
-          icon="pencil-outline"
-          style={styles.editButton}
-        />
+        {isPending && (
+          <CustomButton
+            title="Edit Report"
+            onPress={handleEdit}
+            variant="secondary"
+            size="lg"
+            icon="pencil-outline"
+            style={styles.editButton}
+          />
+        )}
 
         <CustomButton
           title="Delete"
@@ -274,7 +355,7 @@ export default function ReportDetailsScreen() {
           variant="danger"
           size="lg"
           icon="trash-can-outline"
-          style={styles.deleteButton}
+          style={[styles.deleteButton, !isPending && { flex: 1 }]}
         />
       </View>
     </ScrollView>
@@ -312,6 +393,11 @@ const styles = StyleSheet.create({
     bottom: 16,
     right: 16,
   },
+  heroPriorityOverlay: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+  },
   videoBadge: {
     position: 'absolute',
     top: 16,
@@ -339,6 +425,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
   },
+  leftMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   categoryTag: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -348,11 +439,41 @@ const styles = StyleSheet.create({
   categoryText: {
     fontWeight: '700',
   },
+  refTag: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    backgroundColor: '#EFF6FF',
+    borderRadius: 9999,
+  },
+  refText: {
+    fontWeight: '800',
+  },
   dateText: {},
   title: {
     fontWeight: '800',
     lineHeight: 28,
+    marginBottom: 10,
+  },
+  reviewNoteBox: {
+    padding: 12,
+    borderWidth: 1,
     marginBottom: 14,
+  },
+  noteHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+    gap: 6,
+  },
+  noteTitle: {
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+  },
+  noteBody: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '500',
   },
   sectionHeading: {
     fontWeight: '700',

@@ -5,6 +5,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider, useTheme } from '../theme/ThemeContext';
 import { ToastProvider } from '../context/ToastContext';
 import { AuthProvider } from '../context/AuthContext';
+import { NotificationProvider } from '../context/NotificationContext';
 import { ReportProvider } from '../context/ReportContext';
 
 function NavigationStack() {
@@ -32,6 +33,7 @@ function NavigationStack() {
         <Stack.Screen name="login" options={{ headerShown: false }} />
         <Stack.Screen name="register" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="(government)" options={{ headerShown: false }} />
         <Stack.Screen
           name="report/camera"
           options={{
@@ -60,6 +62,13 @@ function NavigationStack() {
           }}
         />
         <Stack.Screen
+          name="government/report/[id]"
+          options={{
+            title: 'Review Civic Report',
+            headerBackTitle: 'Queue',
+          }}
+        />
+        <Stack.Screen
           name="edit/[id]"
           options={{
             title: 'Edit Report',
@@ -77,9 +86,11 @@ export default function RootLayout() {
       <ThemeProvider>
         <ToastProvider>
           <AuthProvider>
-            <ReportProvider>
-              <NavigationStack />
-            </ReportProvider>
+            <NotificationProvider>
+              <ReportProvider>
+                <NavigationStack />
+              </ReportProvider>
+            </NotificationProvider>
           </AuthProvider>
         </ToastProvider>
       </ThemeProvider>

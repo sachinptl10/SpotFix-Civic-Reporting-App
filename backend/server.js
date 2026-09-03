@@ -27,7 +27,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     status: 'online',
-    message: 'SpotFix Civic Reporting API is running smoothly',
+    version: '2.0.0',
+    message: 'SpotFix Civic Reporting & Approval API is running smoothly',
     timestamp: new Date().toISOString(),
   });
 });
@@ -35,6 +36,8 @@ app.get('/api/health', (req, res) => {
 // Mount route handlers
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/reports', require('./routes/reportRoutes'));
+app.use('/api/notifications', require('./routes/notificationRoutes'));
+app.use('/api/analytics', require('./routes/analyticsRoutes'));
 
 // 404 handler for unknown routes
 app.use((req, res) => {
@@ -50,14 +53,13 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 
 const server = app.listen(PORT, '0.0.0.0', () => {
-  console.log(`[SpotFix API] Server listening on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
-  console.log(`[SpotFix API] Local: http://localhost:${PORT}/api/health`);
+  console.log(`[SpotFix API V2] Server listening on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
+  console.log(`[SpotFix API V2] Local: http://localhost:${PORT}/api/health`);
 });
 
 // Handle unhandled promise rejections gracefully
 process.on('unhandledRejection', (err) => {
   console.error(`[Unhandled Rejection] ${err.message}`);
-  // Keep server running in dev mode
 });
 
 module.exports = app;

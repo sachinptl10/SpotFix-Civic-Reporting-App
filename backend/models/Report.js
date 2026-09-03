@@ -1,31 +1,71 @@
 const mongoose = require('mongoose');
 
+const statusHistorySchema = new mongoose.Schema(
+  {
+    status: {
+      type: String,
+      required: true,
+      enum: ['pending', 'under_review', 'approved', 'rejected', 'resolved'],
+    },
+    note: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    changedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    timestamp: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+  { _id: false }
+);
+
 const reportSchema = new mongoose.Schema(
   {
+    reportNumber: {
+      type: String,
+      unique: true,
+      index: true,
+      sparse: true,
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: [true, 'Report must be linked to a user'],
+      index: true,
     },
     title: {
       type: String,
       required: [true, 'Please provide an issue title'],
       trim: true,
       minlength: [5, 'Title must be at least 5 characters'],
-      maxlength: [150, 'Title cannot exceed 150 characters'],
+      maxlength: [120, 'Title cannot exceed 120 characters'],
     },
     description: {
       type: String,
       required: [true, 'Please provide a detailed description'],
       trim: true,
       minlength: [10, 'Description must be at least 10 characters'],
-      maxlength: [1000, 'Description cannot exceed 1000 characters'],
+      maxlength: [2000, 'Description cannot exceed 2000 characters'],
     },
     category: {
       type: String,
       required: [true, 'Please select a category'],
       enum: {
         values: [
+          'roads',
+          'sanitation',
+          'electricity',
+          'water',
+          'drainage',
+          'public-property',
+          'other',
+          // Backward compatibility mappings
           'Pothole',
           'Garbage',
           'Broken Streetlight',
@@ -37,11 +77,12 @@ const reportSchema = new mongoose.Schema(
         ],
         message: '{VALUE} is not a valid category',
       },
-      default: 'Other',
+      default: 'other',
+      index: true,
     },
     imageUrl: {
       type: String,
-      required: [true, 'Issue photograph or video is required'],
+      default: '',
     },
     mediaType: {
       type: String,
@@ -62,23 +103,63 @@ const reportSchema = new mongoose.Schema(
     },
     address: {
       type: String,
-      required: [true, 'Physical address/location description is required'],
+      default: '',
       trim: true,
     },
     status: {
       type: String,
-      enum: ['Submitted', 'Pending', 'Under Review', 'In Progress', 'Resolved', 'Rejected'],
-      default: 'Pending',
+      enum: {
+        values: ['pending', 'under_review', 'approved', 'rejected', 'resolved'],
+        message: '{VALUE} is not a valid status',
+      },
+      default: 'pending',
+      index: true,
     },
+    priority: {
+      type: String,
+      enum: ['low', 'medium', 'high'],
+      default: 'medium',
+      index: true,
+    },
+    reviewedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
+    reviewNote: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    resolvedImageUrl: {
+      type: String,
+      default: '',
+    },
+    resolutionNote: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    resolvedAt: {
+      type: Date,
+      default: null,
+    },
+    statusHistory: [statusHistorySchema],
   },
   {
     timestamps: true,
   }
 );
 
-// Search and performance indexes
+// Indexes for high performance triage and government queues
+reportSchema.index({ status: 1, createdAt: -1 });
 reportSchema.index({ user: 1, createdAt: -1 });
-reportSchema.index({ latitude: 1, longitude: 1 });
-reportSchema.index({ title: 'text', description: 'text', address: 'text' });
+reportSchema.index({ category: 1, priority: 1, createdAt: -1 });
+reportSchema.index({
+  title: 'text',
+  description: 'text',
+  address: 'text',
+  reportNumber: 'text',
+});
 
 module.exports = mongoose.model('Report', reportSchema);

@@ -3,11 +3,9 @@ import { Tabs } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Platform, StyleSheet } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
-import { useNotifications } from '../../context/NotificationContext';
 
-export default function TabsLayout() {
+export default function GovernmentTabsLayout() {
   const { colors, fontSizes } = useTheme();
-  const { unreadCount } = useNotifications();
 
   return (
     <Tabs
@@ -20,7 +18,7 @@ export default function TabsLayout() {
           fontWeight: '700',
         },
         headerShadowVisible: false,
-        tabBarActiveTintColor: colors.primary,
+        tabBarActiveTintColor: '#0284C7',
         tabBarInactiveTintColor: colors.textMuted,
         tabBarStyle: [
           styles.tabBar,
@@ -36,13 +34,13 @@ export default function TabsLayout() {
       }}
     >
       <Tabs.Screen
-        name="home"
+        name="queue"
         options={{
-          title: 'Home',
+          title: 'Review Queue',
           headerShown: false,
           tabBarIcon: ({ color, focused, size }) => (
             <MaterialCommunityIcons
-              name={focused ? 'home-variant' : 'home-variant-outline'}
+              name={focused ? 'clipboard-text-search' : 'clipboard-text-search-outline'}
               size={size || 24}
               color={color}
             />
@@ -66,35 +64,13 @@ export default function TabsLayout() {
       />
 
       <Tabs.Screen
-        name="alerts"
+        name="analytics"
         options={{
-          title: 'Civic Alerts',
-          tabBarLabel: 'Alerts',
-          headerShown: false,
-          tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
-          tabBarBadgeStyle: {
-            backgroundColor: '#EF4444',
-            fontSize: 10,
-            fontWeight: '700',
-          },
+          title: 'Municipal Analytics',
+          tabBarLabel: 'Analytics',
           tabBarIcon: ({ color, focused, size }) => (
             <MaterialCommunityIcons
-              name={focused ? 'bell' : 'bell-outline'}
-              size={size || 24}
-              color={color}
-            />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="contacts"
-        options={{
-          title: 'Contacts & Alerts',
-          tabBarLabel: 'Contacts',
-          tabBarIcon: ({ color, focused, size }) => (
-            <MaterialCommunityIcons
-              name={focused ? 'account-multiple' : 'account-multiple-outline'}
+              name={focused ? 'chart-box' : 'chart-box-outline'}
               size={size || 24}
               color={color}
             />
@@ -105,11 +81,11 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'My Profile',
+          title: 'Officer Profile',
           tabBarLabel: 'Profile',
           tabBarIcon: ({ color, focused, size }) => (
             <MaterialCommunityIcons
-              name={focused ? 'account-circle' : 'account-circle-outline'}
+              name={focused ? 'account-shield' : 'account-shield-outline'}
               size={size || 24}
               color={color}
             />
@@ -128,6 +104,6 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   tabBarLabel: {
-    fontWeight: '600',
+    fontWeight: '700',
   },
 });

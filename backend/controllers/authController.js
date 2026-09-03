@@ -1,10 +1,14 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-// Helper to generate JWT
-const generateToken = (id) => {
+// Helper to generate JWT with identity and role
+const generateToken = (user) => {
   return jwt.sign(
-    { id },
+    {
+      id: user._id,
+      userId: user._id,
+      role: user.role,
+    },
     process.env.JWT_SECRET || 'spotfix_super_secret_jwt_key_2024_secure_change_in_production',
     {
       expiresIn: '30d',
@@ -12,7 +16,7 @@ const generateToken = (id) => {
   );
 };
 
-// @desc    Register a new user
+// @desc    Register a new citizen user
 // @route   POST /api/auth/register
 // @access  Public
 const register = async (req, res, next) => {
@@ -63,14 +67,15 @@ const register = async (req, res, next) => {
       });
     }
 
-    // Create user
+    // Always create as citizen role for public self-registration (security rule)
     const user = await User.create({
       name: name.trim(),
       email: email.toLowerCase().trim(),
       password,
+      role: 'citizen',
     });
 
-    const token = generateToken(user._id);
+    const token = generateToken(user);
 
     res.status(201).json({
       success: true,
@@ -80,6 +85,7 @@ const register = async (req, res, next) => {
         id: user._id,
         name: user.name,
         email: user.email,
+        role: user.role,
         createdAt: user.createdAt,
       },
     });
@@ -129,7 +135,14 @@ const login = async (req, res, next) => {
       });
     }
 
-    const token = generateToken(user._id);
+    if (!user.isActive) {
+      return res.status(403).json({
+        success: false,
+        message: 'Your account has been deactivated.',
+      });
+    }
+
+    const token = generateToken(user);
 
     res.status(200).json({
       success: true,
@@ -139,6 +152,7 @@ const login = async (req, res, next) => {
         id: user._id,
         name: user.name,
         email: user.email,
+        role: user.role || 'citizen',
         createdAt: user.createdAt,
       },
     });
@@ -148,7 +162,7 @@ const login = async (req, res, next) => {
 };
 
 // @desc    Get current user profile
-// @route   GET /api/auth/profile
+// @route   GET /api/auth/profile or /api/auth/me
 // @access  Private
 const getProfile = async (req, res, next) => {
   try {
@@ -166,6 +180,7 @@ const getProfile = async (req, res, next) => {
         id: user._id,
         name: user.name,
         email: user.email,
+        role: user.role || 'citizen',
         createdAt: user.createdAt,
       },
     });

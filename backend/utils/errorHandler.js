@@ -1,9 +1,6 @@
 // Centralized error handling middleware
 const errorHandler = (err, req, res, next) => {
-  let error = { ...err };
-  error.message = err.message;
-
-  console.error(`[Error] ${err.name}: ${err.message}`);
+  console.error(`[Error] ${err.name || 'Error'}: ${err.message}`);
 
   // Mongoose bad ObjectId
   if (err.name === 'CastError') {
@@ -16,8 +13,8 @@ const errorHandler = (err, req, res, next) => {
 
   // Mongoose duplicate key
   if (err.code === 11000) {
-    const message = 'An account with that email address already exists.';
-    return res.status(400).json({
+    const message = 'An account with that email address or identifier already exists.';
+    return res.status(409).json({
       success: false,
       message,
     });
@@ -28,7 +25,7 @@ const errorHandler = (err, req, res, next) => {
     const message = Object.values(err.errors)
       .map((val) => val.message)
       .join(', ');
-    return res.status(400).json({
+    return res.status(422).json({
       success: false,
       message,
     });
@@ -37,9 +34,9 @@ const errorHandler = (err, req, res, next) => {
   // Multer errors
   if (err.name === 'MulterError') {
     if (err.code === 'LIMIT_FILE_SIZE') {
-      return res.status(400).json({
+      return res.status(422).json({
         success: false,
-        message: 'File size exceeds 10MB limit.',
+        message: 'File size exceeds allowed limit (30MB).',
       });
     }
     return res.status(400).json({
@@ -48,10 +45,12 @@ const errorHandler = (err, req, res, next) => {
     });
   }
 
-  // Default server error
-  res.status(error.statusCode || 500).json({
+  const statusCode = err.status || err.statusCode || 500;
+
+  res.status(statusCode).json({
     success: false,
-    message: error.message || 'Server Error. Please try again later.',
+    message: err.message || 'Server Error. Please try again later.',
+    errors: err.errors || undefined,
   });
 };
 

@@ -8,23 +8,25 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import StatusBadge from './StatusBadge';
+import PriorityBadge from './PriorityBadge';
 import { formatDate, getImageUrl, truncateText } from '../utils/helpers';
 import { CATEGORIES } from '../utils/constants';
 import { useTheme } from '../theme/ThemeContext';
 
-export default function ReportCard({ report, onPress }) {
+export default function ReportCard({ report, onPress, showPriority = true }) {
   const { colors, borderRadius, spacing, fontSizes } = useTheme();
 
   if (!report) return null;
 
   const categoryMeta = CATEGORIES.find((c) => c.id === report.category) || {
-    label: report.category,
+    label: report.category || 'Other',
     icon: 'alert-circle-outline',
     color: colors.primary,
   };
 
   const imageSource = report.imageUrl ? { uri: getImageUrl(report.imageUrl) } : null;
   const isVideo = report.mediaType === 'video';
+  const reportRef = report.reportNumber ? `#${report.reportNumber}` : '';
 
   return (
     <TouchableOpacity
@@ -68,14 +70,22 @@ export default function ReportCard({ report, onPress }) {
           </View>
         )}
 
+        {/* Status Badge overlay */}
         <View style={styles.statusBadgeOverlay}>
           <StatusBadge status={report.status} size="sm" />
         </View>
+
+        {/* Priority Badge overlay */}
+        {showPriority && report.priority && (
+          <View style={styles.priorityBadgeOverlay}>
+            <PriorityBadge priority={report.priority} size="sm" />
+          </View>
+        )}
       </View>
 
       {/* Card Content */}
       <View style={[styles.content, { padding: spacing.md }]}>
-        {/* Category & Time */}
+        {/* Report ID & Date Row */}
         <View style={styles.topRow}>
           <View style={styles.categoryPill}>
             <MaterialCommunityIcons
@@ -89,9 +99,16 @@ export default function ReportCard({ report, onPress }) {
             </Text>
           </View>
 
-          <Text style={[styles.dateText, { color: colors.textMuted, fontSize: fontSizes.xs }]}>
-            {formatDate(report.createdAt)}
-          </Text>
+          <View style={styles.dateAndRefRow}>
+            {reportRef ? (
+              <Text style={[styles.refText, { color: colors.primary, fontSize: fontSizes.xs }]}>
+                {reportRef}
+              </Text>
+            ) : null}
+            <Text style={[styles.dateText, { color: colors.textMuted, fontSize: fontSizes.xs }]}>
+              • {formatDate(report.createdAt)}
+            </Text>
+          </View>
         </View>
 
         {/* Title */}
@@ -185,6 +202,11 @@ const styles = StyleSheet.create({
     top: 8,
     right: 8,
   },
+  priorityBadgeOverlay: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+  },
   videoBadge: {
     position: 'absolute',
     bottom: 8,
@@ -215,6 +237,14 @@ const styles = StyleSheet.create({
   },
   categoryLabel: {
     fontWeight: '700',
+  },
+  dateAndRefRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  refText: {
+    fontWeight: '800',
   },
   dateText: {},
   title: {

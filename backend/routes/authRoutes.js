@@ -9,5 +9,6 @@ router.post('/login', login);
 
 // Protected routes
 router.get('/profile', protect, getProfile);
+router.get('/me', protect, getProfile);
 
 module.exports = router;

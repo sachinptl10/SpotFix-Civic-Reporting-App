@@ -41,9 +41,13 @@ export default function LoginScreen() {
     setLoading(true);
 
     try {
-      await login(email.trim(), password);
-      toast.showSuccess('Welcome back to SpotFix!');
-      router.replace('/(tabs)/home');
+      const data = await login(email.trim(), password);
+      toast.showSuccess(`Welcome back to SpotFix${data?.user?.role === 'government' ? ' Government Portal' : ''}!`);
+      if (data?.user?.role === 'government') {
+        router.replace('/(government)/queue');
+      } else {
+        router.replace('/(tabs)/home');
+      }
     } catch (err) {
       console.warn('[Login] Submission error:', err);
       const message = getErrorMessage(err, 'Failed to log in. Please check your credentials.');

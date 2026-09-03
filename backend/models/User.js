@@ -26,6 +26,19 @@ const userSchema = new mongoose.Schema(
       minlength: [6, 'Password must be at least 6 characters long'],
       select: false, // Do not return password by default in queries
     },
+    role: {
+      type: String,
+      enum: ['citizen', 'government'],
+      default: 'citizen',
+    },
+    pushToken: {
+      type: String,
+      default: null,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
   {
     timestamps: true,

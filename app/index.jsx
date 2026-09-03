@@ -2,26 +2,31 @@ import React, { useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../theme/ThemeContext';
 import LoadingState from '../components/LoadingState';
-import { COLORS } from '../utils/constants';
 
 export default function Index() {
-  const { isLoading, isAuthenticated } = useAuth();
+  const { isLoading, isAuthenticated, isGovernment } = useAuth();
+  const { colors } = useTheme();
   const router = useRouter();
 
   useEffect(() => {
     if (!isLoading) {
       if (isAuthenticated) {
-        router.replace('/(tabs)/home');
+        if (isGovernment) {
+          router.replace('/(government)/queue');
+        } else {
+          router.replace('/(tabs)/home');
+        }
       } else {
         router.replace('/login');
       }
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [isLoading, isAuthenticated, isGovernment, router]);
 
   return (
-    <View style={styles.container}>
-      <LoadingState message="Starting SpotFix..." fullScreen />
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <LoadingState message="Loading SpotFix Civic Platform..." fullScreen />
     </View>
   );
 }
@@ -29,6 +34,5 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
   },
 });

@@ -83,11 +83,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const role = user?.role || 'citizen';
+  const isGovernment = role === 'government';
+  const isCitizen = role === 'citizen';
+
   return (
     <AuthContext.Provider
       value={{
         user,
         token,
+        role,
+        isGovernment,
+        isCitizen,
         isLoading,
         isAuthenticated: !!token && !!user,
         login,

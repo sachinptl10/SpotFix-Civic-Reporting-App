@@ -39,14 +39,33 @@ export const reportService = {
   },
 
   /**
-   * Get reports with pagination, category filter, and text query
+   * Get reports for authenticated citizen
+   */
+  async getMyReports(params = {}) {
+    const query = new URLSearchParams();
+    if (params.category && params.category !== 'All') query.append('category', params.category);
+    if (params.status && params.status !== 'All') query.append('status', params.status);
+    if (params.q) query.append('q', params.q.trim());
+    if (params.page) query.append('page', String(params.page));
+    if (params.limit) query.append('limit', String(params.limit));
+
+    const queryString = query.toString();
+    const endpoint = queryString ? `/reports/mine?${queryString}` : '/reports/mine';
+
+    return await api.get(endpoint);
+  },
+
+  /**
+   * Get reports with pagination, category filter, priority, status, and text query
    */
   async getReports(params = {}) {
     const query = new URLSearchParams();
     if (params.scope) query.append('scope', params.scope);
     if (params.category && params.category !== 'All') query.append('category', params.category);
-    if (params.status) query.append('status', params.status);
-    if (params.q) query.append('q', params.q.trim());
+    if (params.status && params.status !== 'All') query.append('status', params.status);
+    if (params.priority && params.priority !== 'All') query.append('priority', params.priority);
+    if (params.search || params.q) query.append('search', (params.search || params.q).trim());
+    if (params.sort) query.append('sort', params.sort);
     if (params.page) query.append('page', String(params.page));
     if (params.limit) query.append('limit', String(params.limit));
 
@@ -61,6 +80,63 @@ export const reportService = {
    */
   async getReportById(id) {
     return await api.get(`/reports/${id}`);
+  },
+
+  /**
+   * Mark report as under review (Government)
+   */
+  async markUnderReview(id, note = '') {
+    return await api.patch(`/reports/${id}/review`, { note });
+  },
+
+  /**
+   * Approve report for municipal action (Government)
+   */
+  async approveReport(id, reviewNote = '') {
+    return await api.patch(`/reports/${id}/approve`, { reviewNote });
+  },
+
+  /**
+   * Reject report with mandatory reason (Government)
+   */
+  async rejectReport(id, reviewNote) {
+    return await api.patch(`/reports/${id}/reject`, { reviewNote });
+  },
+
+  /**
+   * Set report priority (Government)
+   */
+  async setPriority(id, priority) {
+    return await api.patch(`/reports/${id}/priority`, { priority });
+  },
+
+  /**
+   * Resolve report with resolution photo and note (Government)
+   */
+  async resolveReport(id, { note, imageUri }) {
+    const formData = new FormData();
+    formData.append('note', note);
+
+    if (imageUri) {
+      const filename = imageUri.split('/').pop() || 'resolution_proof.jpg';
+      const match = /\.(\w+)$/.exec(filename);
+      const ext = match ? match[1].toLowerCase() : 'jpg';
+
+      let mimeType = 'image/jpeg';
+      if (ext === 'png') mimeType = 'image/png';
+      else if (ext === 'webp') mimeType = 'image/webp';
+
+      formData.append('resolvedImage', {
+        uri: imageUri,
+        name: filename,
+        type: mimeType,
+      });
+    }
+
+    return await apiRequest(`/reports/${id}/resolve`, {
+      method: 'PATCH',
+      body: formData,
+    });
   },
 
   /**
@@ -106,7 +182,7 @@ export const reportService = {
   },
 
   /**
-   * Get report counts and statistics for profile dashboard
+   * Get report counts and statistics
    */
   async getReportStats() {
     return await api.get('/reports/stats');
