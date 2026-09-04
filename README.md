@@ -1,6 +1,6 @@
 # SpotFix V2 — Citizen ↔ Government Civic Issue Management & Approval System
 
-SpotFix V2 is an enterprise-grade civic issue reporting and municipal management platform built with **React Native**, **Expo (SDK 54)**, **Expo Router**, and **JavaScript / JSX only**, powered by a hardened **Node.js, Express, MongoDB, and Mongoose** REST backend.
+SpotFix V2 is an enterprise-grade civic issue reporting and municipal management platform built with **React Native (0.86.3)**, **Expo (SDK 57)**, **Expo Router (57.0.18)**, and **JavaScript / JSX only**, powered by a hardened **Node.js, Express, MongoDB, and Mongoose** REST backend.
 
 V2 features a two-tier **Citizen ↔ Government workflow** with role-based authentication, a municipal triage queue, review notes, mandatory rejection reasons, resolution proof photo uploads, an immutable audit trail (`statusHistory`), an in-app citizen notification center (`Alerts`), geospatial 2dsphere proximity search, and comprehensive municipal analytics.
 
@@ -69,8 +69,8 @@ Every status change appends to the `statusHistory` array on the Report document:
 ## 3. Technology Stack & Backend Hardening
 
 ### Mobile Frontend
-- **Framework**: React Native 0.81.5 with Expo SDK 54 (~54.0.37)
-- **Routing**: Expo Router (~6.0.24) with file-based layout groups
+- **Framework**: React Native 0.86.3 with Expo SDK 57 (~57.0.19)
+- **Routing**: Expo Router (~57.0.18) with file-based layout groups
 - **Language**: **JavaScript & JSX only** (0 `.ts` or `.tsx` files)
 - **Hardware Integrations**:
   - `expo-camera`: Live preview, front/back flip, flash/torch, zoom, tap-to-focus, video recording.
