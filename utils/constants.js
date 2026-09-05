@@ -7,7 +7,7 @@ import { Platform } from 'react-native';
  * - iOS Simulator: 'http://localhost:5000'
  * - Physical Device: 'http://<YOUR_COMPUTER_LOCAL_IP>:5000' (e.g. http://192.168.1.100:5000)
  */
-export const SERVER_HOST = 'http://192.168.1.179:5000';
+export const SERVER_HOST = Platform.OS === 'web' ? 'http://localhost:5000' : 'http://192.168.1.179:5000';
 
 export const API_BASE_URL = `${SERVER_HOST}/api`;
 
