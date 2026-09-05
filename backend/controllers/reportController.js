@@ -8,6 +8,7 @@ const {
   generateReportNumber,
   transitionReportStatus,
 } = require('../services/reportWorkflowService');
+const { generateWorkOrderPdf } = require('../services/workOrderPdfService');
 
 // @desc    Create a new civic issue report
 // @route   POST /api/reports
@@ -505,6 +506,34 @@ const getReportStats = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Export a single report as printable Field Repair Work Order PDF
+// @route   GET /api/reports/:id/export-pdf
+// @access  Private (Citizen owner or Government official)
+const exportReportPdf = asyncHandler(async (req, res) => {
+  const report = await Report.findById(req.params.id)
+    .populate('user', 'name email')
+    .populate('reviewedBy', 'name email');
+
+  if (!report) {
+    throw new AppError('Report not found.', 404);
+  }
+
+  // Citizens can only export their own reports; government officials can export any
+  if (!report.user.equals(req.user._id) && req.user.role !== 'government') {
+    throw new AppError('Access denied. You cannot export this work order.', 403);
+  }
+
+  const pdfBuffer = await generateWorkOrderPdf(report);
+
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader(
+    'Content-Disposition',
+    `attachment; filename="work-order-${report.reportNumber || report._id}.pdf"`
+  );
+  res.setHeader('Content-Length', pdfBuffer.length);
+  res.end(pdfBuffer);
+});
+
 module.exports = {
   createReport,
   getNearbyReports,
@@ -519,4 +548,5 @@ module.exports = {
   updateReport,
   deleteReport,
   getReportStats,
+  exportReportPdf,
 };

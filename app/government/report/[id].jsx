@@ -35,6 +35,7 @@ export default function GovernmentReportDetailScreen() {
   const [report, setReport] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isActionLoading, setIsActionLoading] = useState(false);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [error, setError] = useState(null);
 
   const fetchReport = useCallback(async () => {
@@ -131,6 +132,20 @@ export default function GovernmentReportDetailScreen() {
       toast.showError(err.message || 'Failed to resolve report.');
     } finally {
       setIsActionLoading(false);
+    }
+  };
+
+  // Export Work Order PDF
+  const handleExportPdf = async () => {
+    if (!report) return;
+    try {
+      setIsExportingPdf(true);
+      await reportService.exportWorkOrderPdf(report._id, report.reportNumber);
+      toast.showSuccess('Work order PDF generated successfully!');
+    } catch (err) {
+      toast.showError(err.message || 'Failed to generate PDF work order.');
+    } finally {
+      setIsExportingPdf(false);
     }
   };
 
@@ -336,6 +351,33 @@ export default function GovernmentReportDetailScreen() {
             />
           )}
 
+          {/* Field Repair Work Order Export */}
+          <View style={[styles.workOrderBox, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border, borderRadius: borderRadius.lg }]}>
+            <View style={{ flex: 1, marginRight: 12 }}>
+              <Text style={[styles.workOrderTitle, { color: colors.textPrimary, fontSize: fontSizes.sm }]}>
+                Field Repair Work Order
+              </Text>
+              <Text style={[styles.workOrderDesc, { color: colors.textSecondary, fontSize: fontSizes.xs }]}>
+                Generate official contractor repair order with GPS coordinates, QR code, and photo evidence.
+              </Text>
+            </View>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={handleExportPdf}
+              disabled={isExportingPdf}
+              style={[styles.exportPdfBtn, { backgroundColor: colors.primary, borderRadius: borderRadius.md }]}
+            >
+              {isExportingPdf ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <>
+                  <MaterialCommunityIcons name="file-pdf-box" size={18} color="#FFFFFF" style={{ marginRight: 6 }} />
+                  <Text style={styles.exportPdfBtnText}>Export PDF</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          </View>
+
           {/* Audit Trail Timeline */}
           <Text style={[styles.sectionHeading, { color: colors.textSecondary, fontSize: fontSizes.xs }]}>
             Status History & Audit Trail
@@ -514,5 +556,30 @@ const styles = StyleSheet.create({
     color: '#0F172A',
     fontSize: 13,
     fontWeight: '500',
+  },
+  workOrderBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 14,
+    borderWidth: 1,
+    marginBottom: 20,
+  },
+  workOrderTitle: {
+    fontWeight: '700',
+    marginBottom: 2,
+  },
+  workOrderDesc: {
+    lineHeight: 16,
+  },
+  exportPdfBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+  },
+  exportPdfBtnText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 13,
   },
 });

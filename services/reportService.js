@@ -1,4 +1,6 @@
-import api, { apiRequest } from './api';
+import { Platform, Linking } from 'react-native';
+import api, { apiRequest, getStoredToken } from './api';
+import { API_BASE_URL } from '../utils/constants';
 
 export const reportService = {
   /**
@@ -186,6 +188,36 @@ export const reportService = {
    */
   async getReportStats() {
     return await api.get('/reports/stats');
+  },
+
+  /**
+   * Export Field Repair Work Order PDF
+   */
+  async exportWorkOrderPdf(id, reportNumber = 'report') {
+    const token = await getStoredToken();
+    const url = `${API_BASE_URL}/reports/${id}/export-pdf`;
+
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      const res = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) throw new Error('Failed to generate PDF work order');
+      const blob = await res.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `work-order-${reportNumber}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(blobUrl);
+      return true;
+    } else {
+      await Linking.openURL(url);
+      return true;
+    }
   },
 };
 

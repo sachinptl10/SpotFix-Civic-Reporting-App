@@ -14,6 +14,7 @@ const {
   updateReport,
   deleteReport,
   getReportStats,
+  exportReportPdf,
 } = require('../controllers/reportController');
 const { protect, requireRole } = require('../middleware/auth');
 const upload = require('../middleware/upload');
@@ -51,6 +52,8 @@ router.patch(
 );
 
 // Individual report operations
+router.get('/:id/export-pdf', exportReportPdf);
+
 router.route('/:id')
   .get(getReportById)
   .put(upload.single('image'), updateReport)

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import MapView, { Marker, PROVIDER_DEFAULT } from 'react-native-maps';
@@ -35,7 +36,21 @@ export default function ReportDetailsScreen() {
   const [report, setReport] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [error, setError] = useState(null);
+
+  const handleExportPdf = async () => {
+    if (!report) return;
+    try {
+      setIsExportingPdf(true);
+      await reportService.exportWorkOrderPdf(report._id || report.id, report.reportNumber);
+      toast.showSuccess('Work order PDF generated successfully!');
+    } catch (err) {
+      toast.showError(err.message || 'Failed to generate PDF work order.');
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
 
   const loadReportDetails = useCallback(async () => {
     try {
@@ -324,6 +339,33 @@ export default function ReportDetailsScreen() {
           )}
         </View>
 
+        {/* Field Repair Work Order Export */}
+        <View style={[styles.workOrderBox, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border, borderRadius: borderRadius.lg }]}>
+          <View style={{ flex: 1, marginRight: 12 }}>
+            <Text style={[styles.workOrderTitle, { color: colors.textPrimary, fontSize: fontSizes.sm }]}>
+              Field Repair Work Order
+            </Text>
+            <Text style={[styles.workOrderDesc, { color: colors.textSecondary, fontSize: fontSizes.xs }]}>
+              Download the official repair work order PDF with GPS coordinates, QR code, and photo evidence.
+            </Text>
+          </View>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={handleExportPdf}
+            disabled={isExportingPdf}
+            style={[styles.exportPdfBtn, { backgroundColor: colors.primary, borderRadius: borderRadius.md }]}
+          >
+            {isExportingPdf ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <>
+                <MaterialCommunityIcons name="file-pdf-box" size={18} color="#FFFFFF" style={{ marginRight: 6 }} />
+                <Text style={styles.exportPdfBtnText}>Export PDF</Text>
+              </>
+            )}
+          </TouchableOpacity>
+        </View>
+
         {/* Status Audit Timeline */}
         <Text style={[styles.sectionHeading, { color: colors.textSecondary, fontSize: fontSizes.xs }]}>
           Status Timeline & Audit Trail
@@ -521,5 +563,30 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     flex: 1.2,
+  },
+  workOrderBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 14,
+    borderWidth: 1,
+    marginBottom: 20,
+  },
+  workOrderTitle: {
+    fontWeight: '700',
+    marginBottom: 2,
+  },
+  workOrderDesc: {
+    lineHeight: 16,
+  },
+  exportPdfBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+  },
+  exportPdfBtnText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 13,
   },
 });

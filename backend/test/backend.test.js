@@ -316,4 +316,12 @@ test('SpotFix Backend Automated Suite', async (t) => {
     assert.strictEqual(list.status, 200);
     assert.ok(list.data.notifications.length >= 1);
   });
+
+  await t.test('16. Field Repair Work Order PDF Export (200)', async () => {
+    const res = await jsonRequest('GET', `/api/reports/${testReportId}/export-pdf`, null, govToken);
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(res.headers['content-type'], 'application/pdf');
+    assert.ok(res.headers['content-disposition'].includes('work-order-'));
+    assert.ok(typeof res.data === 'string' && res.data.startsWith('%PDF-'));
+  });
 });
