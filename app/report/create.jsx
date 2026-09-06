@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
   Alert,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
 import MapView, { Marker, PROVIDER_DEFAULT } from 'react-native-maps';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useReports } from '../../context/ReportContext';
@@ -27,12 +28,26 @@ import { getErrorMessage } from '../../utils/helpers';
 
 export default function CreateReportScreen() {
   const router = useRouter();
-  const { imageUri, mediaType = 'image' } = useLocalSearchParams();
+  const params = useLocalSearchParams();
   const { addReport, fetchReports } = useReports();
   const { colors, borderRadius, spacing, fontSizes } = useTheme();
   const toast = useToast();
 
   const mapRef = useRef(null);
+
+  // Attached Media State (Reactive & Updatable in Form)
+  const [currentImageUri, setCurrentImageUri] = useState(params.imageUri || '');
+  const [currentMediaType, setCurrentMediaType] = useState(params.mediaType || 'image');
+  const [isPickerActive, setIsPickerActive] = useState(false);
+
+  // Sync params if routed with fresh media
+  useEffect(() => {
+    if (params.imageUri && params.imageUri !== currentImageUri) {
+      setCurrentImageUri(params.imageUri);
+      setCurrentMediaType(params.mediaType || 'image');
+      setErrors((prev) => ({ ...prev, image: null }));
+    }
+  }, [params.imageUri, params.mediaType]);
 
   // Form Fields
   const [title, setTitle] = useState('');
@@ -122,12 +137,77 @@ export default function CreateReportScreen() {
     toast.showSuccess('Switched back to Live GPS tracking.');
   };
 
+  // Take Photo directly via camera
+  const handleCapturePhoto = async () => {
+    try {
+      setIsPickerActive(true);
+      const perm = await ImagePicker.requestCameraPermissionsAsync();
+      if (!perm.granted) {
+        Alert.alert(
+          'Camera Access Required',
+          'SpotFix needs camera access to photograph civic issues. Would you like to use the Pro Viewfinder instead?',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Open Viewfinder', onPress: () => router.push('/report/camera') },
+          ]
+        );
+        return;
+      }
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        quality: 0.85,
+        mediaTypes: ['images'],
+      });
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setCurrentImageUri(result.assets[0].uri);
+        setCurrentMediaType('image');
+        setErrors((prev) => ({ ...prev, image: null }));
+        toast.showSuccess('Photograph attached successfully!');
+      }
+    } catch (err) {
+      console.warn('[CreateReport] Camera launch error:', err);
+      toast.showError('Could not launch camera. Opening Viewfinder...');
+      router.push('/report/camera');
+    } finally {
+      setIsPickerActive(false);
+    }
+  };
+
+  // Pick from Photo Gallery
+  const handlePickFromGallery = async () => {
+    try {
+      setIsPickerActive(true);
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images', 'videos'],
+        allowsEditing: true,
+        quality: 0.85,
+      });
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const asset = result.assets[0];
+        setCurrentImageUri(asset.uri);
+        setCurrentMediaType(asset.type === 'video' ? 'video' : 'image');
+        setErrors((prev) => ({ ...prev, image: null }));
+        toast.showSuccess('Media attached from library!');
+      }
+    } catch (err) {
+      console.warn('[CreateReport] Gallery picker error:', err);
+      toast.showError('Could not open media library.');
+    } finally {
+      setIsPickerActive(false);
+    }
+  };
+
+  const handleRemovePhoto = () => {
+    setCurrentImageUri('');
+    setCurrentMediaType('image');
+  };
+
   const handleSubmit = async () => {
     const validation = validateReportForm({
       title,
       category,
       description,
-      imageUri,
+      imageUri: currentImageUri,
       location,
     });
 
@@ -148,8 +228,8 @@ export default function CreateReportScreen() {
         latitude: location.latitude,
         longitude: location.longitude,
         address: address || `${location.latitude.toFixed(5)}, ${location.longitude.toFixed(5)}`,
-        imageUri,
-        mediaType,
+        imageUri: currentImageUri,
+        mediaType: currentMediaType,
       });
 
       if (result && result.report) {
@@ -172,7 +252,7 @@ export default function CreateReportScreen() {
     }
   };
 
-  const isVideo = mediaType === 'video';
+  const isVideo = currentMediaType === 'video';
 
   return (
     <KeyboardAvoidingView
@@ -184,13 +264,13 @@ export default function CreateReportScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Section 1: Attached Media Preview */}
+        {/* Section 1: Attached Media Preview & Direct Photo Capture */}
         <View
           style={[
             styles.sectionCard,
             {
               backgroundColor: colors.surface,
-              borderColor: colors.border,
+              borderColor: errors.image ? colors.danger : colors.border,
               borderRadius: borderRadius.xl,
               padding: spacing.md,
               marginBottom: spacing.md,
@@ -198,9 +278,12 @@ export default function CreateReportScreen() {
           ]}
         >
           <View style={styles.cardHeaderRow}>
-            <Text style={[styles.cardHeader, { color: colors.textPrimary, fontSize: fontSizes.md }]}>
-              {isVideo ? 'Attached Video' : 'Issue Photograph'}
-            </Text>
+            <View style={styles.headerLabelWithIcon}>
+              <MaterialCommunityIcons name="camera" size={18} color={colors.primary} style={{ marginRight: 6 }} />
+              <Text style={[styles.cardHeader, { color: colors.textPrimary, fontSize: fontSizes.md }]}>
+                {isVideo ? 'Attached Video' : 'Issue Photograph *'}
+              </Text>
+            </View>
             {isVideo && (
               <View style={[styles.typeBadge, { backgroundColor: colors.primary }]}>
                 <MaterialCommunityIcons name="video" size={14} color="#FFFFFF" />
@@ -209,25 +292,111 @@ export default function CreateReportScreen() {
             )}
           </View>
 
-          <View style={[styles.imagePreviewContainer, { borderRadius: borderRadius.lg }]}>
-            {imageUri ? (
-              <Image source={{ uri: imageUri }} style={styles.attachedImage} resizeMode="cover" />
-            ) : (
-              <View style={[styles.noImage, { backgroundColor: colors.surfaceSubtle }]}>
-                <MaterialCommunityIcons name="image-off-outline" size={40} color={colors.textMuted} />
-                <Text style={[styles.noImageText, { color: colors.textMuted, fontSize: fontSizes.sm }]}>
-                  No media attached
-                </Text>
+          {currentImageUri ? (
+            <View>
+              <View style={[styles.imagePreviewContainer, { borderRadius: borderRadius.lg }]}>
+                <Image source={{ uri: currentImageUri }} style={styles.attachedImage} resizeMode="cover" />
+                {isVideo && (
+                  <View style={styles.videoOverlay}>
+                    <MaterialCommunityIcons name="play-circle" size={36} color="#FFFFFF" />
+                  </View>
+                )}
               </View>
-            )}
-            <TouchableOpacity
-              onPress={() => router.push('/report/camera')}
-              style={styles.changePhotoBadge}
-            >
-              <MaterialCommunityIcons name="camera-retake" size={16} color="#FFFFFF" />
-              <Text style={styles.changePhotoText}>Retake</Text>
-            </TouchableOpacity>
-          </View>
+
+              {/* Action buttons when media is attached */}
+              <View style={styles.mediaActionsRow}>
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={handleCapturePhoto}
+                  disabled={isPickerActive}
+                  style={[styles.mediaActionBtn, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }]}
+                >
+                  <MaterialCommunityIcons name="camera-retake" size={16} color={colors.primary} />
+                  <Text style={[styles.mediaActionBtnText, { color: colors.primary }]}>Retake Photo</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={handlePickFromGallery}
+                  disabled={isPickerActive}
+                  style={[styles.mediaActionBtn, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }]}
+                >
+                  <MaterialCommunityIcons name="image-edit-outline" size={16} color={colors.textSecondary} />
+                  <Text style={[styles.mediaActionBtnText, { color: colors.textSecondary }]}>Change</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={handleRemovePhoto}
+                  style={[styles.mediaActionBtn, styles.mediaActionBtnDanger]}
+                >
+                  <MaterialCommunityIcons name="trash-can-outline" size={16} color="#EF4444" />
+                  <Text style={[styles.mediaActionBtnText, { color: '#EF4444' }]}>Remove</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ) : (
+            /* No Media Attached: Show Direct Photo Capture Card & Action Buttons */
+            <View style={styles.emptyMediaBox}>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={handleCapturePhoto}
+                style={[
+                  styles.emptyMediaDropzone,
+                  {
+                    backgroundColor: colors.surfaceSubtle,
+                    borderColor: errors.image ? colors.danger : colors.border,
+                    borderRadius: borderRadius.lg,
+                  },
+                ]}
+              >
+                <View style={[styles.cameraIconCircle, { backgroundColor: colors.primary }]}>
+                  <MaterialCommunityIcons name="camera-plus" size={28} color="#FFFFFF" />
+                </View>
+                <Text style={[styles.emptyMediaTitle, { color: colors.textPrimary, fontSize: fontSizes.md }]}>
+                  Click Photo of Civil Issue
+                </Text>
+                <Text style={[styles.emptyMediaSub, { color: colors.textMuted, fontSize: fontSizes.xs }]}>
+                  High-clarity photo evidence is required for municipal verification
+                </Text>
+              </TouchableOpacity>
+
+              {/* Direct Buttons to Click Photo or Pick from Gallery */}
+              <View style={styles.captureButtonsRow}>
+                <TouchableOpacity
+                  activeOpacity={0.85}
+                  onPress={handleCapturePhoto}
+                  disabled={isPickerActive}
+                  style={[styles.captureBtn, styles.captureBtnPrimary, { backgroundColor: colors.primary, borderRadius: borderRadius.md }]}
+                >
+                  <MaterialCommunityIcons name="camera" size={18} color="#FFFFFF" style={{ marginRight: 6 }} />
+                  <Text style={styles.captureBtnPrimaryText}>Take Photo</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  activeOpacity={0.85}
+                  onPress={handlePickFromGallery}
+                  disabled={isPickerActive}
+                  style={[styles.captureBtn, styles.captureBtnSecondary, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border, borderRadius: borderRadius.md }]}
+                >
+                  <MaterialCommunityIcons name="image-outline" size={18} color={colors.textPrimary} style={{ marginRight: 6 }} />
+                  <Text style={[styles.captureBtnSecondaryText, { color: colors.textPrimary }]}>Photo Gallery</Text>
+                </TouchableOpacity>
+              </View>
+
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => router.push('/report/camera')}
+                style={styles.proCameraLink}
+              >
+                <MaterialCommunityIcons name="view-finder" size={16} color={colors.primary} />
+                <Text style={[styles.proCameraLinkText, { color: colors.primary }]}>
+                  Open Full Viewfinder Camera / Video
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
           {errors.image ? (
             <Text style={[styles.errorText, { color: colors.danger, fontSize: fontSizes.xs }]}>
               {errors.image}
@@ -491,30 +660,117 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  noImage: {
-    flex: 1,
+  headerLabelWithIcon: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  videoOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  noImageText: {
-    marginTop: 4,
-  },
-  changePhotoBadge: {
-    position: 'absolute',
-    bottom: 8,
-    right: 8,
+  mediaActionsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.75)',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 9999,
+    gap: 8,
+    marginTop: 10,
   },
-  changePhotoText: {
-    color: '#FFFFFF',
+  mediaActionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    gap: 6,
+  },
+  mediaActionBtnDanger: {
+    backgroundColor: '#FEF2F2',
+    borderColor: '#FCA5A5',
+  },
+  mediaActionBtnText: {
     fontSize: 12,
     fontWeight: '600',
-    marginLeft: 4,
+  },
+  emptyMediaBox: {
+    width: '100%',
+  },
+  emptyMediaDropzone: {
+    width: '100%',
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  cameraIconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  emptyMediaTitle: {
+    fontWeight: '700',
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  emptyMediaSub: {
+    textAlign: 'center',
+    lineHeight: 16,
+    maxWidth: 260,
+  },
+  captureButtonsRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 8,
+  },
+  captureBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+  },
+  captureBtnPrimary: {
+    elevation: 2,
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  captureBtnPrimaryText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 13,
+  },
+  captureBtnSecondary: {
+    borderWidth: 1,
+  },
+  captureBtnSecondaryText: {
+    fontWeight: '600',
+    fontSize: 13,
+  },
+  proCameraLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    gap: 6,
+  },
+  proCameraLinkText: {
+    fontSize: 12,
+    fontWeight: '600',
   },
   locationHeaderRow: {
     flexDirection: 'row',

@@ -66,6 +66,22 @@ export default function TabsLayout() {
       />
 
       <Tabs.Screen
+        name="report"
+        options={{
+          title: 'Click Photo',
+          tabBarLabel: 'Snap & Report',
+          headerShown: false,
+          tabBarIcon: ({ color, focused, size }) => (
+            <MaterialCommunityIcons
+              name={focused ? 'camera' : 'camera-outline'}
+              size={size || 26}
+              color={focused ? colors.primary : color}
+            />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
         name="alerts"
         options={{
           title: 'Civic Alerts',
@@ -92,6 +108,7 @@ export default function TabsLayout() {
         options={{
           title: 'Contacts & Alerts',
           tabBarLabel: 'Contacts',
+          href: null,
           tabBarIcon: ({ color, focused, size }) => (
             <MaterialCommunityIcons
               name={focused ? 'account-multiple' : 'account-multiple-outline'}

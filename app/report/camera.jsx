@@ -217,6 +217,30 @@ export default function CameraScreen() {
     } catch (err) {
       console.warn('[ImagePicker] Error:', err);
     }
+  // Launch system camera directly (works universally even if CameraView has issues)
+  const handleLaunchSystemCamera = async () => {
+    try {
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.85,
+        mediaTypes: ['images'],
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const asset = result.assets[0];
+        router.push({
+          pathname: '/report/preview',
+          params: {
+            imageUri: asset.uri,
+            mediaType: 'image',
+          },
+        });
+      }
+    } catch (err) {
+      console.warn('[Camera] System camera error:', err);
+      Alert.alert('Camera Error', 'Could not open system camera.');
+    }
   };
 
   const handleCancel = () => {
@@ -225,11 +249,31 @@ export default function CameraScreen() {
 
   if (!permission) {
     return (
-      <View style={[styles.centerContainer, { backgroundColor: colors.background }]}>
+      <View style={[styles.centerContainer, { backgroundColor: colors.background, padding: 20 }]}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
+        <Text style={[styles.loadingText, { color: colors.textSecondary, marginVertical: 12 }]}>
           Initializing camera...
         </Text>
+        <TouchableOpacity
+          onPress={handleLaunchSystemCamera}
+          style={[styles.galleryFallbackButton, { marginTop: 16 }]}
+        >
+          <MaterialCommunityIcons name="camera" size={20} color={colors.primary} />
+          <Text style={[styles.galleryFallbackText, { color: colors.primary }]}>
+            Open System Camera Directly
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handlePickFromGallery} style={styles.galleryFallbackButton}>
+          <MaterialCommunityIcons name="image-outline" size={20} color={colors.primary} />
+          <Text style={[styles.galleryFallbackText, { color: colors.primary }]}>
+            Or pick from Photo Gallery
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleCancel} style={styles.cancelFallback}>
+          <Text style={[styles.cancelFallbackText, { color: colors.textSecondary }]}>
+            Cancel
+          </Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -244,6 +288,13 @@ export default function CameraScreen() {
           onRequestPermission={requestPermission}
           buttonTitle="Allow Camera Access"
         />
+
+        <TouchableOpacity onPress={handleLaunchSystemCamera} style={styles.galleryFallbackButton}>
+          <MaterialCommunityIcons name="camera" size={20} color={colors.primary} />
+          <Text style={[styles.galleryFallbackText, { color: colors.primary }]}>
+            Open System Camera Directly
+          </Text>
+        </TouchableOpacity>
 
         <TouchableOpacity onPress={handlePickFromGallery} style={styles.galleryFallbackButton}>
           <MaterialCommunityIcons name="image-outline" size={20} color={colors.primary} />
@@ -416,8 +467,15 @@ export default function CameraScreen() {
               </View>
             </TouchableOpacity>
 
-            {/* Spacer for symmetrical layout */}
-            <View style={{ width: 44 }} />
+            {/* System Camera Direct Access */}
+            <TouchableOpacity
+              onPress={handleLaunchSystemCamera}
+              disabled={isRecording}
+              style={styles.iconCircleButton}
+              accessibilityLabel="Switch to system camera app"
+            >
+              <MaterialCommunityIcons name="camera" size={24} color="#FFFFFF" />
+            </TouchableOpacity>
           </View>
         </View>
       </CameraView>

@@ -312,6 +312,35 @@ export default function MapScreen() {
           <LoadingState message="Loading map markers..." />
         </View>
       )}
+
+      {/* Floating Action Button: Report at Current Spot */}
+      <TouchableOpacity
+        activeOpacity={0.88}
+        onPress={() => {
+          if (userLocation) {
+            router.push({
+              pathname: '/report/create',
+              params: {
+                initialLat: userLocation.latitude,
+                initialLng: userLocation.longitude,
+              },
+            });
+          } else {
+            router.push('/report/camera');
+          }
+        }}
+        style={[
+          styles.mapReportFab,
+          {
+            backgroundColor: colors.primary,
+            bottom: selectedReport ? 130 : 24,
+          },
+        ]}
+        accessibilityLabel="Report issue at current location"
+      >
+        <MaterialCommunityIcons name="camera-plus" size={20} color="#FFFFFF" />
+        <Text style={styles.mapReportFabText}>Report Spot</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -447,5 +476,25 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 4,
+  },
+  mapReportFab: {
+    position: 'absolute',
+    right: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 11,
+    paddingHorizontal: 16,
+    borderRadius: 9999,
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    gap: 6,
+  },
+  mapReportFabText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 13,
   },
 });

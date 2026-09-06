@@ -276,6 +276,23 @@ export default function HomeScreen() {
         }
         showsVerticalScrollIndicator={false}
       />
+
+      {/* Floating Action Button: Instant Photo Capture & Report */}
+      <TouchableOpacity
+        activeOpacity={0.88}
+        onPress={handleCreateReport}
+        style={[
+          styles.floatingActionButton,
+          {
+            backgroundColor: colors.primary,
+            bottom: 24,
+          },
+        ]}
+        accessibilityLabel="Photograph and report civic issue"
+      >
+        <MaterialCommunityIcons name="camera-plus" size={22} color="#FFFFFF" />
+        <Text style={styles.fabText}>Snap Photo</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -388,5 +405,25 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontWeight: '500',
+  },
+  floatingActionButton: {
+    position: 'absolute',
+    right: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 18,
+    borderRadius: 9999,
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    gap: 8,
+  },
+  fabText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 14,
   },
 });
