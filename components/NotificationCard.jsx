@@ -6,11 +6,11 @@ import { formatDate } from '../utils/helpers';
 import StatusBadge from './StatusBadge';
 
 const NOTIF_ICONS = {
-  report_submitted: { icon: 'send-check', color: '#3B82F6' },
-  under_review: { icon: 'progress-clock', color: '#8B5CF6' },
-  approved: { icon: 'check-decagram', color: '#0284C7' },
-  rejected: { icon: 'close-circle', color: '#EF4444' },
-  resolved: { icon: 'check-circle', color: '#10B981' },
+  report_submitted: { icon: 'send-check', color: '#334155' },
+  under_review: { icon: 'progress-clock', color: '#1D4ED8' },
+  approved: { icon: 'check-decagram', color: '#0E7490' },
+  rejected: { icon: 'close-circle', color: '#B91C1C' },
+  resolved: { icon: 'check-circle', color: '#15803D' },
 };
 
 export default function NotificationCard({ notification, onPress }) {
@@ -32,8 +32,10 @@ export default function NotificationCard({ notification, onPress }) {
         styles.card,
         {
           backgroundColor: isUnread ? colors.surfaceSubtle : colors.surface,
-          borderColor: isUnread ? colors.primary : colors.border,
-          borderRadius: borderRadius.lg,
+          borderColor: colors.border,
+          borderLeftWidth: isUnread ? 3.5 : 1,
+          borderLeftColor: isUnread ? colors.primary : colors.border,
+          borderRadius: borderRadius.md,
           padding: spacing.md,
           marginBottom: spacing.sm,
         },

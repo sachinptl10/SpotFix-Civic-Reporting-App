@@ -19,7 +19,7 @@ export default function ReportCard({ report, onPress, showPriority = true }) {
   if (!report) return null;
 
   const categoryMeta = CATEGORIES.find((c) => c.id === report.category) || {
-    label: report.category || 'Other',
+    label: report.category || 'Civic Issue',
     icon: 'alert-circle-outline',
     color: colors.primary,
   };
@@ -30,7 +30,7 @@ export default function ReportCard({ report, onPress, showPriority = true }) {
 
   return (
     <TouchableOpacity
-      activeOpacity={0.85}
+      activeOpacity={0.8}
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={`Report: ${report.title}`}
@@ -39,12 +39,12 @@ export default function ReportCard({ report, onPress, showPriority = true }) {
         {
           backgroundColor: colors.surface,
           borderColor: colors.border,
-          borderRadius: borderRadius.lg,
+          borderRadius: borderRadius.md,
           marginBottom: spacing.md,
         },
       ]}
     >
-      {/* Thumbnail */}
+      {/* Evidence Thumbnail with Clear Overlays */}
       <View style={[styles.imageContainer, { backgroundColor: colors.surfaceSubtle }]}>
         {imageSource ? (
           <Image
@@ -62,11 +62,11 @@ export default function ReportCard({ report, onPress, showPriority = true }) {
           </View>
         )}
 
-        {/* Video indicator badge */}
+        {/* Video format badge */}
         {isVideo && (
           <View style={styles.videoBadge}>
-            <MaterialCommunityIcons name="play-circle" size={16} color="#FFFFFF" />
-            <Text style={styles.videoBadgeText}>Video</Text>
+            <MaterialCommunityIcons name="video" size={14} color="#FFFFFF" />
+            <Text style={styles.videoBadgeText}>Video Clip</Text>
           </View>
         )}
 
@@ -83,35 +83,32 @@ export default function ReportCard({ report, onPress, showPriority = true }) {
         )}
       </View>
 
-      {/* Card Content */}
+      {/* Card Content Ledger */}
       <View style={[styles.content, { padding: spacing.md }]}>
-        {/* Report ID & Date Row */}
+        {/* Header Row: Category Badge & Ticket Reference */}
         <View style={styles.topRow}>
-          <View style={styles.categoryPill}>
+          <View style={[styles.categoryBadge, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }]}>
             <MaterialCommunityIcons
               name={categoryMeta.icon}
-              size={14}
+              size={13}
               color={categoryMeta.color}
-              style={{ marginRight: 4 }}
+              style={{ marginRight: 5 }}
             />
-            <Text style={[styles.categoryLabel, { color: categoryMeta.color, fontSize: fontSizes.xs }]}>
+            <Text style={[styles.categoryLabel, { color: colors.textPrimary, fontSize: fontSizes.xs }]}>
               {categoryMeta.label}
             </Text>
           </View>
 
-          <View style={styles.dateAndRefRow}>
-            {reportRef ? (
-              <Text style={[styles.refText, { color: colors.primary, fontSize: fontSizes.xs }]}>
+          {reportRef ? (
+            <View style={[styles.ticketBadge, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }]}>
+              <Text style={[styles.ticketText, { color: colors.textSecondary, fontSize: fontSizes.tiny }]}>
                 {reportRef}
               </Text>
-            ) : null}
-            <Text style={[styles.dateText, { color: colors.textMuted, fontSize: fontSizes.xs }]}>
-              • {formatDate(report.createdAt)}
-            </Text>
-          </View>
+            </View>
+          ) : null}
         </View>
 
-        {/* Title */}
+        {/* Report Title */}
         <Text
           style={[
             styles.title,
@@ -136,35 +133,49 @@ export default function ReportCard({ report, onPress, showPriority = true }) {
           ]}
           numberOfLines={2}
         >
-          {truncateText(report.description, 100)}
+          {truncateText(report.description, 110)}
         </Text>
 
-        {/* Address footer */}
+        {/* Metadata Footer: Address & Clean Date */}
         <View
           style={[
-            styles.addressRow,
+            styles.footerRow,
             {
               borderTopColor: colors.border,
             },
           ]}
         >
-          <MaterialCommunityIcons
-            name="map-marker-outline"
-            size={14}
-            color={colors.textSecondary}
-            style={styles.locationIcon}
-          />
+          <View style={styles.locationGroup}>
+            <MaterialCommunityIcons
+              name="map-marker-outline"
+              size={14}
+              color={colors.textSecondary}
+              style={{ marginRight: 4 }}
+            />
+            <Text
+              style={[
+                styles.addressText,
+                {
+                  color: colors.textSecondary,
+                  fontSize: fontSizes.xs,
+                },
+              ]}
+              numberOfLines={1}
+            >
+              {report.address || 'Geotagged coordinates recorded'}
+            </Text>
+          </View>
+
           <Text
             style={[
-              styles.addressText,
+              styles.dateText,
               {
-                color: colors.textSecondary,
-                fontSize: fontSizes.xs,
+                color: colors.textMuted,
+                fontSize: fontSizes.tiny,
               },
             ]}
-            numberOfLines={1}
           >
-            {report.address || 'Location coordinates saved'}
+            {formatDate(report.createdAt)}
           </Text>
         </View>
       </View>
@@ -176,11 +187,6 @@ const styles = StyleSheet.create({
   card: {
     borderWidth: 1,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
   },
   imageContainer: {
     width: '100%',
@@ -213,14 +219,14 @@ const styles = StyleSheet.create({
     left: 8,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    backgroundColor: 'rgba(15, 23, 42, 0.85)',
     paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 9999,
+    paddingVertical: 3,
+    borderRadius: 4,
   },
   videoBadgeText: {
     color: '#FFFFFF',
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '600',
     marginLeft: 4,
   },
@@ -229,42 +235,55 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 6,
+    marginBottom: 8,
   },
-  categoryPill: {
+  categoryBadge: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderWidth: 1,
+    borderRadius: 4,
   },
   categoryLabel: {
+    fontWeight: '600',
+  },
+  ticketBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 2.5,
+    borderWidth: 1,
+    borderRadius: 4,
+  },
+  ticketText: {
     fontWeight: '700',
+    letterSpacing: 0.3,
   },
-  dateAndRefRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  refText: {
-    fontWeight: '800',
-  },
-  dateText: {},
   title: {
     fontWeight: '700',
     marginBottom: 4,
+    letterSpacing: -0.2,
   },
   description: {
     lineHeight: 20,
     marginBottom: 10,
   },
-  addressRow: {
+  footerRow: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: 8,
+    paddingTop: 9,
     borderTopWidth: 1,
   },
-  locationIcon: {
-    marginRight: 4,
+  locationGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 10,
   },
   addressText: {
     flex: 1,
+  },
+  dateText: {
+    fontWeight: '500',
   },
 });

@@ -6,24 +6,24 @@ import { useTheme } from '../theme/ThemeContext';
 const PRIORITY_CONFIG = {
   high: {
     label: 'High Priority',
-    color: '#EF4444',
+    color: '#DC2626',
     bgColor: '#FEF2F2',
     borderColor: '#FECACA',
     icon: 'alert-decagram',
   },
   medium: {
     label: 'Medium Priority',
-    color: '#F59E0B',
+    color: '#D97706',
     bgColor: '#FFFBEB',
     borderColor: '#FDE68A',
     icon: 'alert-circle-outline',
   },
   low: {
-    label: 'Low Priority',
-    color: '#10B981',
-    bgColor: '#ECFDF5',
-    borderColor: '#A7F3D0',
-    icon: 'information-outline',
+    label: 'Routine Priority',
+    color: '#475569',
+    bgColor: '#F1F5F9',
+    borderColor: '#CBD5E1',
+    icon: 'calendar-clock-outline',
   },
 };
 
@@ -40,7 +40,7 @@ export default function PriorityBadge({ priority = 'medium', size = 'md', style 
         {
           backgroundColor: config.bgColor,
           borderColor: config.borderColor,
-          borderRadius: borderRadius.full,
+          borderRadius: borderRadius.sm,
         },
         isSmall && styles.badgeSmall,
         style,

@@ -18,7 +18,7 @@ export default function GovernmentTabsLayout() {
           fontWeight: '700',
         },
         headerShadowVisible: false,
-        tabBarActiveTintColor: '#0284C7',
+        tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
         tabBarStyle: [
           styles.tabBar,

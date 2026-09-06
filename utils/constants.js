@@ -50,78 +50,78 @@ export const CATEGORIES = [
 
 export const STATUS_CONFIG = {
   'pending': {
-    label: 'Pending',
-    color: '#3B82F6',
-    bgColor: '#EFF6FF',
-    borderColor: '#BFDBFE',
+    label: 'Pending Review',
+    color: '#334155',
+    bgColor: '#F1F5F9',
+    borderColor: '#CBD5E1',
     icon: 'clock-outline',
   },
   'under_review': {
     label: 'Under Review',
-    color: '#8B5CF6',
-    bgColor: '#F5F3FF',
-    borderColor: '#DDD6FE',
+    color: '#1D4ED8',
+    bgColor: '#EFF6FF',
+    borderColor: '#BFDBFE',
     icon: 'progress-clock',
   },
   'approved': {
-    label: 'Approved',
-    color: '#0284C7',
-    bgColor: '#F0F9FF',
-    borderColor: '#BAE6FD',
+    label: 'Approved for Work',
+    color: '#0E7490',
+    bgColor: '#ECFEFF',
+    borderColor: '#A5F3FC',
     icon: 'check-decagram-outline',
   },
   'resolved': {
-    label: 'Resolved',
-    color: '#10B981',
-    bgColor: '#ECFDF5',
-    borderColor: '#A7F3D0',
+    label: 'Work Completed',
+    color: '#15803D',
+    bgColor: '#F0FDF4',
+    borderColor: '#BBF7D0',
     icon: 'check-circle-outline',
   },
   'rejected': {
-    label: 'Rejected',
-    color: '#EF4444',
+    label: 'Not Actionable',
+    color: '#B91C1C',
     bgColor: '#FEF2F2',
     borderColor: '#FECACA',
     icon: 'close-circle-outline',
   },
   'Pending': {
-    label: 'Pending',
-    color: '#3B82F6',
-    bgColor: '#EFF6FF',
-    borderColor: '#BFDBFE',
+    label: 'Pending Review',
+    color: '#334155',
+    bgColor: '#F1F5F9',
+    borderColor: '#CBD5E1',
     icon: 'clock-outline',
   },
   'Submitted': {
-    label: 'Pending',
-    color: '#3B82F6',
-    bgColor: '#EFF6FF',
-    borderColor: '#BFDBFE',
+    label: 'Pending Review',
+    color: '#334155',
+    bgColor: '#F1F5F9',
+    borderColor: '#CBD5E1',
     icon: 'clock-outline',
   },
   'In Progress': {
-    label: 'In Progress',
-    color: '#F59E0B',
-    bgColor: '#FFFBEB',
-    borderColor: '#FDE68A',
+    label: 'Under Review',
+    color: '#1D4ED8',
+    bgColor: '#EFF6FF',
+    borderColor: '#BFDBFE',
     icon: 'progress-clock',
   },
   'Under Review': {
-    label: 'In Progress',
-    color: '#F59E0B',
-    bgColor: '#FFFBEB',
-    borderColor: '#FDE68A',
+    label: 'Under Review',
+    color: '#1D4ED8',
+    bgColor: '#EFF6FF',
+    borderColor: '#BFDBFE',
     icon: 'progress-clock',
   },
   'Resolved': {
-    label: 'Resolved',
-    color: '#10B981',
-    bgColor: '#ECFDF5',
-    borderColor: '#A7F3D0',
+    label: 'Work Completed',
+    color: '#15803D',
+    bgColor: '#F0FDF4',
+    borderColor: '#BBF7D0',
     icon: 'check-circle-outline',
   },
   'Rejected': {
-    label: 'Rejected',
-    color: '#EF4444',
+    label: 'Not Actionable',
+    color: '#B91C1C',
     bgColor: '#FEF2F2',
     borderColor: '#FECACA',
     icon: 'close-circle-outline',
@@ -129,16 +129,16 @@ export const STATUS_CONFIG = {
 };
 
 export const COLORS = {
-  primary: '#2563EB',
-  primaryDark: '#1D4ED8',
-  primaryLight: '#3B82F6',
-  accent: '#10B981',
-  danger: '#EF4444',
-  warning: '#F59E0B',
-  info: '#3B82F6',
-  success: '#10B981',
+  primary: '#153243',
+  primaryDark: '#0E222E',
+  primaryLight: '#284B63',
+  accent: '#D97706',
+  danger: '#DC2626',
+  warning: '#D97706',
+  info: '#0284C7',
+  success: '#15803D',
 
-  // Neutrals / Light Theme
+  // Neutrals / Slate Architecture
   background: '#F8FAFC',
   surface: '#FFFFFF',
   surfaceSubtle: '#F1F5F9',
@@ -147,13 +147,13 @@ export const COLORS = {
 
   // Typography
   textPrimary: '#0F172A',
-  textSecondary: '#64748B',
-  textMuted: '#94A3B8',
+  textSecondary: '#475569',
+  textMuted: '#64748B',
   textInverse: '#FFFFFF',
 
   // Overlays
-  overlay: 'rgba(0, 0, 0, 0.5)',
-  cardShadow: '#0F172A',
+  overlay: 'rgba(15, 23, 42, 0.65)',
+  cardShadow: 'rgba(15, 23, 42, 0.04)',
 };
 
 export const SPACING = {
@@ -166,14 +166,15 @@ export const SPACING = {
 };
 
 export const BORDER_RADIUS = {
-  sm: 6,
-  md: 10,
-  lg: 16,
-  xl: 24,
+  sm: 4,
+  md: 8,
+  lg: 12,
+  xl: 16,
   full: 9999,
 };
 
 export const FONT_SIZES = {
+  tiny: 11,
   xs: 12,
   sm: 14,
   md: 16,

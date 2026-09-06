@@ -206,7 +206,7 @@ export default function GovernmentReportDetailScreen() {
             {
               backgroundColor: colors.surface,
               borderColor: colors.border,
-              borderRadius: borderRadius.xl,
+              borderRadius: borderRadius.md,
               padding: spacing.lg,
               marginBottom: spacing.md,
             },
@@ -214,9 +214,9 @@ export default function GovernmentReportDetailScreen() {
         >
           {/* Reference & Submitter Row */}
           <View style={styles.refRow}>
-            <View style={styles.refPill}>
-              <MaterialCommunityIcons name="pound" size={14} color="#0284C7" />
-              <Text style={styles.refPillText}>
+            <View style={[styles.refPill, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border, borderRadius: borderRadius.sm }]}>
+              <MaterialCommunityIcons name="pound" size={13} color={colors.primary} />
+              <Text style={[styles.refPillText, { color: colors.primary }]}>
                 {report?.reportNumber ? report.reportNumber : `ID: ${report?._id?.slice(-6)}`}
               </Text>
             </View>
@@ -229,9 +229,9 @@ export default function GovernmentReportDetailScreen() {
           {/* Citizen Details */}
           {report?.user?.name && (
             <View style={styles.submitterRow}>
-              <MaterialCommunityIcons name="account-outline" size={16} color={colors.textSecondary} />
+              <MaterialCommunityIcons name="account-outline" size={15} color={colors.textSecondary} />
               <Text style={[styles.submitterText, { color: colors.textSecondary, fontSize: fontSizes.xs }]}>
-                Reported by Citizen: <Text style={{ fontWeight: '700', color: colors.textPrimary }}>{report.user.name}</Text>
+                Citizen Reporter: <Text style={{ fontWeight: '600', color: colors.textPrimary }}>{report.user.name}</Text>
               </Text>
             </View>
           )}
@@ -251,12 +251,12 @@ export default function GovernmentReportDetailScreen() {
 
           {/* Priority Assignment Selector */}
           <Text style={[styles.sectionHeading, { color: colors.textSecondary, fontSize: fontSizes.xs }]}>
-            Assign Priority Level
+            Municipal Priority Level
           </Text>
           <View style={styles.prioritySelectorRow}>
             {PRIORITIES.map((p) => {
               const isSelected = (report?.priority || 'medium').toLowerCase() === p;
-              const color = p === 'high' ? '#EF4444' : p === 'medium' ? '#F59E0B' : '#10B981';
+              const color = p === 'high' ? '#DC2626' : p === 'medium' ? '#D97706' : '#475569';
               return (
                 <TouchableOpacity
                   key={p}

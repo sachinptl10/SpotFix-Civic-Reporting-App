@@ -3,7 +3,7 @@ import { useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { lightColors, darkColors } from './colors';
 import { SPACING, BORDER_RADIUS } from './spacing';
-import { FONT_SIZES, FONT_WEIGHTS } from './typography';
+import { FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS, LETTER_SPACING } from './typography';
 
 const THEME_STORAGE_KEY = '@spotfix_theme_preference';
 
@@ -54,6 +54,8 @@ export const ThemeProvider = ({ children }) => {
         borderRadius: BORDER_RADIUS,
         fontSizes: FONT_SIZES,
         fontWeights: FONT_WEIGHTS,
+        lineHeights: LINE_HEIGHTS,
+        letterSpacing: LETTER_SPACING,
         isReady,
       }}
     >
@@ -75,6 +77,8 @@ export const useTheme = () => {
       borderRadius: BORDER_RADIUS,
       fontSizes: FONT_SIZES,
       fontWeights: FONT_WEIGHTS,
+      lineHeights: LINE_HEIGHTS,
+      letterSpacing: LETTER_SPACING,
     };
   }
   return context;

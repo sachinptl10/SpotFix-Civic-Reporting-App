@@ -51,15 +51,15 @@ export default function GovernmentProfileScreen() {
           styles.headerCard,
           {
             backgroundColor: colors.surface,
-            borderColor: '#0284C7',
-            borderRadius: borderRadius.xl,
+            borderColor: colors.border,
+            borderRadius: borderRadius.md,
             padding: spacing.xl,
             marginBottom: spacing.lg,
           },
         ]}
       >
-        <View style={styles.badgeShieldCircle}>
-          <MaterialCommunityIcons name="shield-account" size={44} color="#0284C7" />
+        <View style={[styles.badgeShieldCircle, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }]}>
+          <MaterialCommunityIcons name="shield-account" size={36} color={colors.primary} />
         </View>
 
         <Text style={[styles.officerName, { color: colors.textPrimary, fontSize: fontSizes.xl }]}>
@@ -70,12 +70,12 @@ export default function GovernmentProfileScreen() {
           {user?.email || 'gov@spotfix.gov'}
         </Text>
 
-        <View style={styles.roleTag}>
-          <MaterialCommunityIcons name="check-decagram" size={14} color="#0284C7" />
-          <Text style={styles.roleTagText}>Authorized Government Official</Text>
+        <View style={[styles.roleTag, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border, borderRadius: borderRadius.sm }]}>
+          <MaterialCommunityIcons name="check-decagram" size={13} color={colors.primary} />
+          <Text style={[styles.roleTagText, { color: colors.primary }]}>Authorized Government Official</Text>
         </View>
 
-        <View style={[styles.deptInfoBox, { backgroundColor: colors.surfaceSubtle, borderRadius: borderRadius.md }]}>
+        <View style={[styles.deptInfoBox, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border, borderRadius: borderRadius.sm }]}>
           <Text style={[styles.deptLabel, { color: colors.textMuted }]}>Assigned Department</Text>
           <Text style={[styles.deptValue, { color: colors.textPrimary, fontSize: fontSizes.sm }]}>
             Department of Public Works & Civic Maintenance
@@ -93,7 +93,7 @@ export default function GovernmentProfileScreen() {
           {
             backgroundColor: colors.surface,
             borderColor: colors.border,
-            borderRadius: borderRadius.lg,
+            borderRadius: borderRadius.md,
           },
         ]}
       >

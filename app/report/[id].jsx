@@ -191,8 +191,8 @@ export default function ReportDetailsScreen() {
           {
             backgroundColor: colors.surface,
             borderColor: colors.border,
-            borderTopLeftRadius: borderRadius.xl,
-            borderTopRightRadius: borderRadius.xl,
+            borderTopLeftRadius: borderRadius.lg,
+            borderTopRightRadius: borderRadius.lg,
             padding: spacing.lg,
           },
         ]}
@@ -200,10 +200,10 @@ export default function ReportDetailsScreen() {
         {/* Report # and Category Row */}
         <View style={styles.metaRow}>
           <View style={styles.leftMeta}>
-            <View style={[styles.categoryTag, { backgroundColor: colors.surfaceSubtle, borderRadius: borderRadius.full }]}>
+            <View style={[styles.categoryTag, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border, borderRadius: borderRadius.sm }]}>
               <MaterialCommunityIcons
                 name={categoryMeta.icon}
-                size={16}
+                size={14}
                 color={categoryMeta.color}
                 style={{ marginRight: 6 }}
               />
@@ -213,7 +213,7 @@ export default function ReportDetailsScreen() {
             </View>
 
             {report?.reportNumber ? (
-              <View style={styles.refTag}>
+              <View style={[styles.refTag, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border, borderRadius: borderRadius.sm }]}>
                 <Text style={[styles.refText, { color: colors.primary, fontSize: fontSizes.xs }]}>
                   #{report.reportNumber}
                 </Text>

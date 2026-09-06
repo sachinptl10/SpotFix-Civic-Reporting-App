@@ -67,14 +67,14 @@ export default function ProfileScreen() {
           {
             backgroundColor: colors.surface,
             borderColor: colors.border,
-            borderRadius: borderRadius.xl,
+            borderRadius: borderRadius.md,
             padding: spacing.xl,
             marginBottom: spacing.lg,
           },
         ]}
       >
-        <View style={[styles.avatarLarge, { backgroundColor: colors.surfaceSubtle, borderColor: colors.primary }]}>
-          <Text style={[styles.avatarLargeText, { color: colors.primary, fontSize: fontSizes.xxl }]}>
+        <View style={[styles.avatarLarge, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border, borderRadius: borderRadius.md }]}>
+          <Text style={[styles.avatarLargeText, { color: colors.primary, fontSize: fontSizes.xl }]}>
             {getUserInitials(user?.name)}
           </Text>
         </View>
@@ -85,7 +85,7 @@ export default function ProfileScreen() {
           {user?.email || 'citizen@spotfix.org'}
         </Text>
 
-        <View style={[styles.badgeRole, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }]}>
+        <View style={[styles.badgeRole, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border, borderRadius: borderRadius.sm }]}>
           <MaterialCommunityIcons name="shield-check" size={14} color={colors.primary} />
           <Text style={[styles.badgeRoleText, { color: colors.primary, fontSize: fontSizes.xs }]}>
             Verified Community Reporter
@@ -100,9 +100,9 @@ export default function ProfileScreen() {
 
       <View style={styles.statsGrid}>
         {/* Total Reports */}
-        <View style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: borderRadius.lg }]}>
-          <View style={[styles.statIconBox, { backgroundColor: '#EFF6FF' }]}>
-            <MaterialCommunityIcons name="clipboard-text-outline" size={24} color={colors.primary} />
+        <View style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: borderRadius.md }]}>
+          <View style={[styles.statIconBox, { backgroundColor: colors.surfaceSubtle }]}>
+            <MaterialCommunityIcons name="clipboard-text-outline" size={22} color={colors.primary} />
           </View>
           <Text style={[styles.statNumber, { color: colors.textPrimary, fontSize: fontSizes.xl }]}>
             {stats?.total || 0}
@@ -113,28 +113,28 @@ export default function ProfileScreen() {
         </View>
 
         {/* Resolved Reports */}
-        <View style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: borderRadius.lg }]}>
-          <View style={[styles.statIconBox, { backgroundColor: '#ECFDF5' }]}>
-            <MaterialCommunityIcons name="check-circle-outline" size={24} color={colors.success} />
+        <View style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: borderRadius.md }]}>
+          <View style={[styles.statIconBox, { backgroundColor: '#F0FDF4' }]}>
+            <MaterialCommunityIcons name="check-circle-outline" size={22} color={colors.success} />
           </View>
           <Text style={[styles.statNumber, { color: colors.success, fontSize: fontSizes.xl }]}>
             {stats?.resolved || 0}
           </Text>
           <Text style={[styles.statLabel, { color: colors.textSecondary, fontSize: fontSizes.xs }]}>
-            Resolved
+            Completed
           </Text>
         </View>
 
         {/* In Progress / Pending */}
-        <View style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: borderRadius.lg }]}>
-          <View style={[styles.statIconBox, { backgroundColor: '#FFFBEB' }]}>
-            <MaterialCommunityIcons name="progress-clock" size={24} color={colors.warning} />
+        <View style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: borderRadius.md }]}>
+          <View style={[styles.statIconBox, { backgroundColor: '#EFF6FF' }]}>
+            <MaterialCommunityIcons name="progress-clock" size={22} color={colors.info} />
           </View>
-          <Text style={[styles.statNumber, { color: colors.warning, fontSize: fontSizes.xl }]}>
+          <Text style={[styles.statNumber, { color: colors.info, fontSize: fontSizes.xl }]}>
             {stats?.pending || 0}
           </Text>
           <Text style={[styles.statLabel, { color: colors.textSecondary, fontSize: fontSizes.xs }]}>
-            In Progress
+            In Review
           </Text>
         </View>
       </View>

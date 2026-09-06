@@ -89,14 +89,14 @@ export default function RegisterScreen() {
       >
         {/* Brand Header */}
         <View style={styles.brandContainer}>
-          <View style={[styles.logoCircle, { backgroundColor: colors.surfaceSubtle }]}>
-            <MaterialCommunityIcons name="account-plus" size={36} color={colors.primary} />
+          <View style={[styles.logoSquare, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }]}>
+            <MaterialCommunityIcons name="account-plus" size={30} color={colors.primary} />
           </View>
-          <Text style={[styles.brandName, { color: colors.primary, fontSize: fontSizes.xxl }]}>
-            SpotFix
+          <Text style={[styles.brandName, { color: colors.primary, fontSize: fontSizes.xl }]}>
+            SpotFix Citizen Registry
           </Text>
           <Text style={[styles.brandTagline, { color: colors.textSecondary, fontSize: fontSizes.xs }]}>
-            Join our civic community
+            Create your account to submit and track local civic issues
           </Text>
         </View>
 
@@ -107,7 +107,7 @@ export default function RegisterScreen() {
             {
               backgroundColor: colors.surface,
               borderColor: colors.border,
-              borderRadius: borderRadius.xl,
+              borderRadius: borderRadius.md,
               padding: spacing.xl,
             },
           ]}
@@ -273,33 +273,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
   },
-  logoCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+  logoSquare: {
+    width: 56,
+    height: 56,
+    borderRadius: 8,
+    borderWidth: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 6,
-    shadowColor: '#2563EB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 3,
+    marginBottom: 10,
   },
   brandName: {
-    fontWeight: '800',
-    letterSpacing: -0.5,
+    fontWeight: '700',
+    letterSpacing: -0.3,
   },
   brandTagline: {
     marginTop: 2,
+    textAlign: 'center',
   },
   formCard: {
     borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
   },
   title: {
     fontWeight: '700',

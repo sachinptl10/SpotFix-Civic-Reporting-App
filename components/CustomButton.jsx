@@ -27,6 +27,15 @@ export default function CustomButton({
 
   const getVariantStyles = () => {
     switch (variant) {
+      case 'accent':
+      case 'signal':
+        return {
+          container: {
+            backgroundColor: colors.accent,
+          },
+          text: { color: '#FFFFFF' },
+          indicatorColor: '#FFFFFF',
+        };
       case 'secondary':
         return {
           container: {

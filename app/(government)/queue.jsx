@@ -24,17 +24,17 @@ import EmptyState from '../../components/EmptyState';
 const STATUS_FILTERS = [
   { id: 'pending', label: 'Pending Review', icon: 'clock-outline' },
   { id: 'under_review', label: 'Under Review', icon: 'progress-clock' },
-  { id: 'approved', label: 'Approved', icon: 'check-decagram-outline' },
-  { id: 'resolved', label: 'Resolved', icon: 'check-circle-outline' },
-  { id: 'rejected', label: 'Rejected', icon: 'close-circle-outline' },
+  { id: 'approved', label: 'Approved for Work', icon: 'check-decagram-outline' },
+  { id: 'resolved', label: 'Work Completed', icon: 'check-circle-outline' },
+  { id: 'rejected', label: 'Not Actionable', icon: 'close-circle-outline' },
   { id: 'All', label: 'All Reports', icon: 'view-grid-outline' },
 ];
 
 const PRIORITY_FILTERS = [
   { id: 'All', label: 'All Priorities' },
-  { id: 'high', label: 'High', color: '#EF4444' },
-  { id: 'medium', label: 'Medium', color: '#F59E0B' },
-  { id: 'low', label: 'Low', color: '#10B981' },
+  { id: 'high', label: 'High', color: '#DC2626' },
+  { id: 'medium', label: 'Medium', color: '#D97706' },
+  { id: 'low', label: 'Routine', color: '#475569' },
 ];
 
 export default function GovernmentQueueScreen() {
@@ -184,9 +184,9 @@ export default function GovernmentQueueScreen() {
               style={[
                 styles.statusTab,
                 {
-                  backgroundColor: isSelected ? '#0284C7' : colors.surface,
-                  borderColor: isSelected ? '#0284C7' : colors.border,
-                  borderRadius: borderRadius.full,
+                  backgroundColor: isSelected ? colors.primary : colors.surface,
+                  borderColor: isSelected ? colors.primary : colors.border,
+                  borderRadius: borderRadius.sm,
                 },
               ]}
             >
@@ -194,7 +194,7 @@ export default function GovernmentQueueScreen() {
                 name={tab.icon}
                 size={14}
                 color={isSelected ? '#FFFFFF' : colors.textSecondary}
-                style={{ marginRight: 4 }}
+                style={{ marginRight: 5 }}
               />
               <Text
                 style={[
@@ -202,7 +202,7 @@ export default function GovernmentQueueScreen() {
                   {
                     color: isSelected ? '#FFFFFF' : colors.textSecondary,
                     fontSize: fontSizes.xs,
-                    fontWeight: isSelected ? '700' : '500',
+                    fontWeight: isSelected ? '600' : '500',
                   },
                 ]}
               >

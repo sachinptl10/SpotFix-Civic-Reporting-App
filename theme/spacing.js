@@ -9,9 +9,9 @@ export const SPACING = {
 };
 
 export const BORDER_RADIUS = {
-  sm: 6,
-  md: 10,
-  lg: 16,
-  xl: 24,
+  sm: 4,
+  md: 8,
+  lg: 12,
+  xl: 16,
   full: 9999,
 };

@@ -5,11 +5,11 @@ import { useTheme } from '../theme/ThemeContext';
 import { formatDate } from '../utils/helpers';
 
 const STATUS_ICONS = {
-  pending: { icon: 'clock-outline', color: '#3B82F6', label: 'Report Submitted' },
-  under_review: { icon: 'progress-clock', color: '#8B5CF6', label: 'Under Review' },
-  approved: { icon: 'check-decagram', color: '#0284C7', label: 'Approved for Work' },
-  rejected: { icon: 'close-circle', color: '#EF4444', label: 'Report Rejected' },
-  resolved: { icon: 'check-circle', color: '#10B981', label: 'Issue Resolved' },
+  pending: { icon: 'clock-outline', color: '#334155', label: 'Report Submitted' },
+  under_review: { icon: 'progress-clock', color: '#1D4ED8', label: 'Under Review' },
+  approved: { icon: 'check-decagram', color: '#0E7490', label: 'Approved for Work' },
+  rejected: { icon: 'close-circle', color: '#B91C1C', label: 'Report Rejected' },
+  resolved: { icon: 'check-circle', color: '#15803D', label: 'Work Completed & Verified' },
 };
 
 export default function StatusTimeline({ statusHistory = [], currentStatus = 'pending' }) {
@@ -19,7 +19,7 @@ export default function StatusTimeline({ statusHistory = [], currentStatus = 'pe
   const historyItems = statusHistory.length > 0 ? statusHistory : [
     {
       status: currentStatus,
-      note: 'Report submitted by citizen',
+      note: 'Civic issue reported by citizen',
       timestamp: new Date(),
     },
   ];
@@ -42,25 +42,37 @@ export default function StatusTimeline({ statusHistory = [], currentStatus = 'pe
             </View>
 
             {/* Right Column: Event Content Card */}
-            <View style={[styles.contentColumn, { paddingBottom: isLast ? 0 : spacing.lg }]}>
-              <View style={styles.headerRow}>
-                <Text style={[styles.statusTitle, { color: colors.textPrimary, fontSize: fontSizes.sm }]}>
-                  {config.label}
-                </Text>
-                <Text style={[styles.timestamp, { color: colors.textMuted, fontSize: fontSizes.tiny }]}>
-                  {formatDate(item.timestamp)}
+            <View style={[styles.contentColumn, { paddingBottom: isLast ? 0 : spacing.md }]}>
+              <View
+                style={[
+                  styles.eventCard,
+                  {
+                    backgroundColor: colors.surfaceSubtle,
+                    borderColor: colors.border,
+                    borderRadius: borderRadius.md,
+                    padding: spacing.sm + 2,
+                  },
+                ]}
+              >
+                <View style={styles.headerRow}>
+                  <Text style={[styles.statusTitle, { color: colors.textPrimary, fontSize: fontSizes.sm }]}>
+                    {config.label}
+                  </Text>
+                  <Text style={[styles.timestamp, { color: colors.textMuted, fontSize: fontSizes.tiny }]}>
+                    {formatDate(item.timestamp)}
+                  </Text>
+                </View>
+
+                {item.note ? (
+                  <Text style={[styles.noteText, { color: colors.textSecondary, fontSize: fontSizes.xs }]}>
+                    {item.note}
+                  </Text>
+                ) : null}
+
+                <Text style={[styles.actorText, { color: colors.textMuted, fontSize: fontSizes.tiny }]}>
+                  Recorded by: {actorName}
                 </Text>
               </View>
-
-              {item.note ? (
-                <Text style={[styles.noteText, { color: colors.textSecondary, fontSize: fontSizes.xs }]}>
-                  {item.note}
-                </Text>
-              ) : null}
-
-              <Text style={[styles.actorText, { color: colors.textMuted, fontSize: fontSizes.tiny }]}>
-                Actioned by: {actorName}
-              </Text>
             </View>
           </View>
         );

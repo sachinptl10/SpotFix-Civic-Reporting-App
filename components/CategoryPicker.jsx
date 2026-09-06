@@ -41,7 +41,7 @@ export default function CategoryPicker({
                 {
                   backgroundColor: isSelected ? colors.surfaceSubtle : colors.surface,
                   borderColor: isSelected ? cat.color : colors.border,
-                  borderRadius: borderRadius.full,
+                  borderRadius: borderRadius.md,
                 },
                 isSelected && styles.chipSelected,
               ]}
