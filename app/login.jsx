@@ -160,6 +160,46 @@ export default function LoginScreen() {
             leftIcon="lock-outline"
           />
 
+          {/* Quick Demo Credentials */}
+          <View style={styles.demoSection}>
+            <Text style={[styles.demoTitle, { color: colors.textMuted, fontSize: fontSizes.xs }]}>
+              QUICK TEST CREDENTIALS:
+            </Text>
+            <View style={styles.demoPillsRow}>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => {
+                  setEmail('admin@spotfix.gov');
+                  setPassword('password123');
+                  setErrors({});
+                  setServerError('');
+                }}
+                style={[styles.demoPill, { backgroundColor: '#EFF6FF', borderColor: '#BFDBFE' }]}
+              >
+                <MaterialCommunityIcons name="shield-account" size={14} color="#2563EB" style={{ marginRight: 4 }} />
+                <Text style={[styles.demoPillText, { color: '#1D4ED8', fontSize: fontSizes.xs }]}>
+                  Gov Official
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => {
+                  setEmail('user@spotfix.com');
+                  setPassword('password123');
+                  setErrors({});
+                  setServerError('');
+                }}
+                style={[styles.demoPill, { backgroundColor: '#F0FDF4', borderColor: '#BBF7D0' }]}
+              >
+                <MaterialCommunityIcons name="account" size={14} color="#16A34A" style={{ marginRight: 4 }} />
+                <Text style={[styles.demoPillText, { color: '#15803D', fontSize: fontSizes.xs }]}>
+                  Citizen
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
           <CustomButton
             title="Sign In"
             onPress={handleLogin}
@@ -297,8 +337,33 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
   },
+  demoSection: {
+    marginVertical: 12,
+  },
+  demoTitle: {
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    marginBottom: 8,
+  },
+  demoPillsRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  demoPill: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    paddingVertical: 7,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+  },
+  demoPillText: {
+    fontWeight: '700',
+  },
   submitButton: {
-    marginTop: 8,
+    marginTop: 4,
   },
   footer: {
     flexDirection: 'row',

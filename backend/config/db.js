@@ -30,6 +30,10 @@ const connectDB = async () => {
       family: 4, // Use IPv4 to avoid IPv6 resolution timeouts on Windows/Node
     });
 
+    // Auto-seed default test accounts (admin@spotfix.gov & user@spotfix.com)
+    const seedDefaultUsers = require('../utils/seedDefaultUsers');
+    seedDefaultUsers();
+
     return conn;
   } catch (error) {
     logger.error(`[MongoDB] Initial connection failure: ${error.message}`);
