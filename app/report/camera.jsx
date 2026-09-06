@@ -316,41 +316,54 @@ export default function CameraScreen() {
 
   return (
     <View style={styles.container}>
+      {/* 1. Full-screen Camera Viewfinder Layer */}
       <CameraView
         ref={cameraRef}
-        style={styles.camera}
+        style={StyleSheet.absoluteFill}
         facing={facing}
         flash={flashMode}
         enableTorch={enableTorch}
         zoom={zoom}
         mode={mode}
-      >
-        {/* Tap to Focus View Overlay */}
-        <TouchableWithoutFeedback onPress={handleTapToFocus}>
-          <View style={StyleSheet.absoluteFill}>
-            {focusPoint && (
-              <Animated.View
-                style={[
-                  styles.focusBox,
-                  {
-                    left: focusPoint.x - 30,
-                    top: focusPoint.y - 30,
-                    transform: [{ scale: focusAnim }],
-                    opacity: focusOpacity,
-                  },
-                ]}
-              >
-                <View style={styles.focusCornerTL} />
-                <View style={styles.focusCornerTR} />
-                <View style={styles.focusCornerBL} />
-                <View style={styles.focusCornerBR} />
-              </Animated.View>
-            )}
-          </View>
-        </TouchableWithoutFeedback>
+      />
 
+      {/* 2. Tap to Focus Overlay */}
+      <TouchableWithoutFeedback onPress={handleTapToFocus}>
+        <View style={StyleSheet.absoluteFill}>
+          {focusPoint && (
+            <Animated.View
+              style={[
+                styles.focusBox,
+                {
+                  left: focusPoint.x - 30,
+                  top: focusPoint.y - 30,
+                  transform: [{ scale: focusAnim }],
+                  opacity: focusOpacity,
+                },
+              ]}
+            >
+              <View style={styles.focusCornerTL} />
+              <View style={styles.focusCornerTR} />
+              <View style={styles.focusCornerBL} />
+              <View style={styles.focusCornerBR} />
+            </Animated.View>
+          )}
+        </View>
+      </TouchableWithoutFeedback>
+
+      {/* 3. Foreground Controls Overlay Layer (Always on top with zIndex: 999) */}
+      <View
+        style={[
+          styles.overlayContainer,
+          {
+            paddingTop: insets.top + 8,
+            paddingBottom: Math.max(insets.bottom, 16) + 16,
+          },
+        ]}
+        pointerEvents="box-none"
+      >
         {/* Top Controls Bar */}
-        <View style={[styles.topControls, { paddingTop: insets.top + 8 }]}>
+        <View style={styles.topControls}>
           <TouchableOpacity
             onPress={handleCancel}
             style={styles.iconCircleButton}
@@ -408,7 +421,7 @@ export default function CameraScreen() {
         )}
 
         {/* Bottom Bar: Mode Selector & Shutter */}
-        <View style={[styles.bottomControls, { paddingBottom: insets.bottom + 20 }]}>
+        <View style={styles.bottomControls}>
           {/* Mode Switcher: Photo / Video */}
           <View style={styles.modeSwitcher}>
             <TouchableOpacity
@@ -438,16 +451,20 @@ export default function CameraScreen() {
             <TouchableOpacity
               onPress={handlePickFromGallery}
               disabled={isRecording}
-              style={styles.iconCircleButton}
+              style={styles.controlWithLabel}
               accessibilityLabel="Pick from photo library"
             >
-              <MaterialCommunityIcons name="image-multiple-outline" size={24} color="#FFFFFF" />
+              <View style={styles.iconCircleButton}>
+                <MaterialCommunityIcons name="image-multiple-outline" size={24} color="#FFFFFF" />
+              </View>
+              <Text style={styles.controlLabelText}>Gallery</Text>
             </TouchableOpacity>
 
-            {/* Shutter Button */}
+            {/* Shutter Button with Camera Icon inside */}
             <TouchableOpacity
               onPress={handleShutterPress}
               disabled={isCapturing}
+              activeOpacity={0.8}
               style={[
                 styles.shutterOuter,
                 mode === 'video' && { borderColor: '#EF4444' },
@@ -465,7 +482,11 @@ export default function CameraScreen() {
                   },
                 ]}
               >
-                {isCapturing && <ActivityIndicator size="small" color="#2563EB" />}
+                {isCapturing ? (
+                  <ActivityIndicator size="small" color="#2563EB" />
+                ) : mode === 'picture' ? (
+                  <MaterialCommunityIcons name="camera" size={32} color="#1E293B" />
+                ) : null}
               </View>
             </TouchableOpacity>
 
@@ -473,14 +494,24 @@ export default function CameraScreen() {
             <TouchableOpacity
               onPress={handleLaunchSystemCamera}
               disabled={isRecording}
-              style={styles.iconCircleButton}
+              style={styles.controlWithLabel}
               accessibilityLabel="Switch to system camera app"
             >
-              <MaterialCommunityIcons name="camera" size={24} color="#FFFFFF" />
+              <View style={styles.iconCircleButton}>
+                <MaterialCommunityIcons name="camera-iris" size={24} color="#FFFFFF" />
+              </View>
+              <Text style={styles.controlLabelText}>System</Text>
             </TouchableOpacity>
           </View>
+
+          {/* Explicit Helper Text: TAP TO CLICK PHOTO */}
+          <View style={styles.tapToSnapBadge}>
+            <Text style={styles.tapToSnapText}>
+              {mode === 'picture' ? 'TAP WHITE BUTTON TO CLICK PHOTO' : 'TAP RED BUTTON TO RECORD VIDEO'}
+            </Text>
+          </View>
         </View>
-      </CameraView>
+      </View>
     </View>
   );
 }
@@ -490,9 +521,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000000',
   },
-  camera: {
-    flex: 1,
+  overlayContainer: {
+    ...StyleSheet.absoluteFillObject,
     justifyContent: 'space-between',
+    zIndex: 999,
+    elevation: 20,
   },
   centerContainer: {
     flex: 1,
@@ -671,5 +704,32 @@ const styles = StyleSheet.create({
   },
   cancelFallbackText: {
     fontSize: 14,
+  },
+  controlWithLabel: {
+    alignItems: 'center',
+    gap: 4,
+  },
+  controlLabelText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '600',
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+  },
+  tapToSnapBadge: {
+    backgroundColor: 'rgba(0, 0, 0, 0.65)',
+    paddingHorizontal: 16,
+    paddingVertical: 5,
+    borderRadius: 9999,
+    marginTop: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  tapToSnapText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
 });
