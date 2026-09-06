@@ -217,6 +217,8 @@ export default function CameraScreen() {
     } catch (err) {
       console.warn('[ImagePicker] Error:', err);
     }
+  };
+
   // Launch system camera directly (works universally even if CameraView has issues)
   const handleLaunchSystemCamera = async () => {
     try {
