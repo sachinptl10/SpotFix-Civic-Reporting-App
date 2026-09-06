@@ -1,13 +1,111 @@
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
-import { API_BASE_URL } from '../utils/constants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { SERVER_HOST, detectDevServerHost } from '../utils/constants';
 
 const TOKEN_KEY = 'spotfix_auth_token';
+const SERVER_OVERRIDE_KEY = 'spotfix_custom_server_host';
 
 let unauthorizedListener = null;
+let cachedServerHost = null;
 
 export const setUnauthorizedListener = (fn) => {
   unauthorizedListener = fn;
+};
+
+/**
+ * Returns the currently active server host URL.
+ * Checks for a user-configured host first; otherwise auto-detects from Expo Metro.
+ */
+export const getActiveServerHost = async () => {
+  try {
+    const custom = await AsyncStorage.getItem(SERVER_OVERRIDE_KEY);
+    if (custom && custom.trim().length > 0) {
+      cachedServerHost = custom.trim().replace(/\/+$/, '');
+      return cachedServerHost;
+    }
+  } catch (err) {
+    // Ignore storage read errors
+  }
+
+  cachedServerHost = detectDevServerHost();
+  return cachedServerHost;
+};
+
+/**
+ * Persists a user-defined custom server host (or clears it to restore auto-detection).
+ */
+export const setActiveServerHost = async (newHost) => {
+  try {
+    if (!newHost || newHost.trim().length === 0) {
+      await AsyncStorage.removeItem(SERVER_OVERRIDE_KEY);
+      cachedServerHost = detectDevServerHost();
+    } else {
+      const clean = newHost.trim().replace(/\/+$/, '');
+      await AsyncStorage.setItem(SERVER_OVERRIDE_KEY, clean);
+      cachedServerHost = clean;
+    }
+  } catch (err) {
+    console.warn('[api] Failed to save custom server host:', err);
+  }
+  return cachedServerHost;
+};
+
+/**
+ * Synchronous getter for currently resolved host
+ */
+export const getCurrentServerHostSync = () => {
+  return cachedServerHost || SERVER_HOST;
+};
+
+/**
+ * Test server connectivity and return latency and diagnostics
+ */
+export const pingServer = async (hostToTest) => {
+  const targetHost = (hostToTest || cachedServerHost || detectDevServerHost()).replace(/\/+$/, '');
+  const startTime = Date.now();
+
+  const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const timeoutId = controller ? setTimeout(() => controller.abort(), 6000) : null;
+
+  try {
+    const response = await fetch(`${targetHost}/api/health`, {
+      method: 'GET',
+      headers: { Accept: 'application/json' },
+      signal: controller?.signal,
+    });
+
+    if (timeoutId) clearTimeout(timeoutId);
+
+    const latencyMs = Date.now() - startTime;
+    const data = await response.json().catch(() => null);
+
+    if (response.ok) {
+      return {
+        success: true,
+        status: response.status,
+        latencyMs,
+        data,
+        host: targetHost,
+      };
+    }
+
+    return {
+      success: false,
+      status: response.status,
+      latencyMs,
+      message: `Server returned HTTP ${response.status}`,
+      host: targetHost,
+    };
+  } catch (err) {
+    if (timeoutId) clearTimeout(timeoutId);
+    return {
+      success: false,
+      latencyMs: Date.now() - startTime,
+      message: err.name === 'AbortError' ? 'Connection timed out (6s)' : err.message,
+      host: targetHost,
+    };
+  }
 };
 
 /**
@@ -74,7 +172,9 @@ export const removeAuthToken = async () => {
  * Central API request handler with automatic token injection & 401 handling
  */
 export const apiRequest = async (endpoint, options = {}) => {
-  const url = `${API_BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+  const host = await getActiveServerHost();
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const url = `${host}/api${cleanEndpoint}`;
 
   const headers = {
     Accept: 'application/json',
@@ -126,11 +226,24 @@ export const apiRequest = async (endpoint, options = {}) => {
 
     return data;
   } catch (error) {
-    if (error.message === 'Network request failed') {
+    const errorMsg = error.message || '';
+    const isNetworkError =
+      error.isNetworkError ||
+      errorMsg === 'Network request failed' ||
+      errorMsg.includes('fetch failed') ||
+      errorMsg.includes('offline') ||
+      errorMsg.includes('The Internet connection appears to be offline') ||
+      errorMsg.includes('Failed to fetch') ||
+      errorMsg.includes('NetworkError') ||
+      errorMsg.includes('UnexpectedException') ||
+      error.name === 'TypeError';
+
+    if (isNetworkError) {
       const netError = new Error(
-        `Cannot reach the SpotFix server at ${API_BASE_URL}. Please check your connection.`
+        `Cannot reach the SpotFix server at ${host}. Please ensure your device and computer are connected to the same Wi-Fi / Hotspot network and the backend server is running.`
       );
       netError.isNetworkError = true;
+      netError.serverHost = host;
       throw netError;
     }
     throw error;

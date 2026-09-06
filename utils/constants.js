@@ -1,13 +1,39 @@
 import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 
 /**
- * Configure your backend server address here.
- * For local development:
- * - Android Emulator: 'http://10.0.2.2:5000'
- * - iOS Simulator: 'http://localhost:5000'
- * - Physical Device: 'http://<YOUR_COMPUTER_LOCAL_IP>:5000' (e.g. http://192.168.1.100:5000)
+ * Automatically detects the development server host IP.
+ * - Web: http://localhost:5000
+ * - Expo Go / Mobile on Wi-Fi / Hotspot: Extracts current host IP from Metro bundler's hostUri
+ * - Fallback: http://172.20.10.2:5000 (Current Personal Hotspot IP)
  */
-export const SERVER_HOST = Platform.OS === 'web' ? 'http://localhost:5000' : 'http://192.168.1.179:5000';
+export const detectDevServerHost = () => {
+  if (Platform.OS === 'web') {
+    return 'http://localhost:5000';
+  }
+
+  try {
+    const hostUri =
+      Constants.expoConfig?.hostUri ||
+      Constants.expoGoConfig?.debuggerHost ||
+      Constants.manifest2?.extra?.expoClient?.hostUri ||
+      Constants.manifest2?.extra?.expoGo?.debuggerHost ||
+      Constants.manifest?.debuggerHost;
+
+    if (hostUri && typeof hostUri === 'string') {
+      const ip = hostUri.split(':')[0];
+      if (ip && ip !== 'localhost' && ip !== '127.0.0.1') {
+        return `http://${ip}:5000`;
+      }
+    }
+  } catch (err) {
+    console.warn('[Constants] Failed to auto-detect host IP:', err);
+  }
+
+  return 'http://172.20.10.2:5000';
+};
+
+export const SERVER_HOST = detectDevServerHost();
 
 export const API_BASE_URL = `${SERVER_HOST}/api`;
 

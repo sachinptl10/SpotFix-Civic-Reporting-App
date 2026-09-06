@@ -1,5 +1,5 @@
 import { Platform, Linking } from 'react-native';
-import api, { apiRequest, getStoredToken } from './api';
+import api, { apiRequest, getStoredToken, getActiveServerHost } from './api';
 import { API_BASE_URL } from '../utils/constants';
 
 export const reportService = {
@@ -195,7 +195,8 @@ export const reportService = {
    */
   async exportWorkOrderPdf(id, reportNumber = 'report') {
     const token = await getStoredToken();
-    const url = `${API_BASE_URL}/reports/${id}/export-pdf`;
+    const host = await getActiveServerHost();
+    const url = `${host}/api/reports/${id}/export-pdf`;
 
     if (Platform.OS === 'web' && typeof window !== 'undefined') {
       const res = await fetch(url, {

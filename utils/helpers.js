@@ -83,10 +83,22 @@ export const getErrorMessage = (error, fallback = 'Something went wrong. Please 
   }
 
   if (error.message) {
-    if (error.message.includes('Network request failed') || error.message.includes('Failed to fetch')) {
-      return 'Unable to reach the SpotFix server. Please check your internet connection or server status.';
+    const msg = error.message;
+    if (
+      msg.includes('Network request failed') ||
+      msg.includes('Failed to fetch') ||
+      msg.includes('fetch failed') ||
+      msg.includes('offline') ||
+      msg.includes('The Internet connection appears to be offline') ||
+      msg.includes('UnexpectedException') ||
+      msg.includes('NetworkError')
+    ) {
+      if (error.serverHost) {
+        return `Cannot reach SpotFix server at ${error.serverHost}. Please ensure backend is running and your device is on the same Wi-Fi / Hotspot network.`;
+      }
+      return 'Unable to reach the SpotFix server. Please check your connection and ensure your phone and computer are on the same Wi-Fi / Hotspot.';
     }
-    return error.message;
+    return msg;
   }
 
   return fallback;

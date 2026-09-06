@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -15,6 +15,8 @@ import { useTheme } from '../theme/ThemeContext';
 import useToast from '../hooks/useToast';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButton';
+import ServerConfigModal from '../components/ServerConfigModal';
+import { getActiveServerHost } from '../services/api';
 import { validateRegistration } from '../utils/validation';
 import { getErrorMessage } from '../utils/helpers';
 
@@ -31,6 +33,12 @@ export default function RegisterScreen() {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState('');
+  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
+  const [activeServerHost, setActiveServerHostState] = useState('');
+
+  useEffect(() => {
+    getActiveServerHost().then((host) => setActiveServerHostState(host));
+  }, []);
 
   const handleRegister = async () => {
     setServerError('');
@@ -113,15 +121,26 @@ export default function RegisterScreen() {
 
           {serverError ? (
             <View style={[styles.serverErrorBox, { borderRadius: borderRadius.md }]}>
-              <MaterialCommunityIcons
-                name="alert-circle-outline"
-                size={20}
-                color={colors.danger}
-                style={{ marginRight: 8 }}
-              />
-              <Text style={[styles.serverErrorText, { color: colors.danger, fontSize: fontSizes.xs }]}>
-                {serverError}
-              </Text>
+              <View style={styles.errorRow}>
+                <MaterialCommunityIcons
+                  name="alert-circle-outline"
+                  size={20}
+                  color={colors.danger}
+                  style={{ marginRight: 8, marginTop: 2 }}
+                />
+                <Text style={[styles.serverErrorText, { color: colors.danger, fontSize: fontSizes.xs }]}>
+                  {serverError}
+                </Text>
+              </View>
+              {(serverError.includes('reach') || serverError.includes('connection') || serverError.includes('server')) && (
+                <TouchableOpacity
+                  onPress={() => setIsConfigModalOpen(true)}
+                  style={[styles.serverFixBtn, { backgroundColor: '#FEE2E2', borderRadius: borderRadius.sm }]}
+                >
+                  <MaterialCommunityIcons name="server-network" size={14} color="#B91C1C" style={{ marginRight: 6 }} />
+                  <Text style={styles.serverFixBtnText}>Diagnose & Fix Server Connection</Text>
+                </TouchableOpacity>
+              )}
             </View>
           ) : null}
 
@@ -203,7 +222,39 @@ export default function RegisterScreen() {
             </Text>
           </TouchableOpacity>
         </View>
+
+        {/* Server Connection Indicator Pill */}
+        <View style={styles.serverPillWrapper}>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => setIsConfigModalOpen(true)}
+            style={[
+              styles.serverPill,
+              {
+                backgroundColor: colors.surfaceSubtle,
+                borderColor: colors.border,
+                borderRadius: borderRadius.full,
+              },
+            ]}
+          >
+            <View style={styles.serverDot} />
+            <Text style={[styles.serverPillText, { color: colors.textSecondary, fontSize: fontSizes.xs }]}>
+              Backend: {activeServerHost || 'Detecting...'}
+            </Text>
+            <MaterialCommunityIcons name="cog-outline" size={15} color={colors.textSecondary} style={{ marginLeft: 6 }} />
+          </TouchableOpacity>
+        </View>
       </ScrollView>
+
+      {/* Server Configuration & Diagnostic Modal */}
+      <ServerConfigModal
+        visible={isConfigModalOpen}
+        onClose={() => setIsConfigModalOpen(false)}
+        onSaved={(newHost) => {
+          setActiveServerHostState(newHost);
+          setServerError('');
+        }}
+      />
     </KeyboardAvoidingView>
   );
 }
@@ -258,17 +309,33 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   serverErrorBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: '#FEF2F2',
     borderWidth: 1,
     borderColor: '#FECACA',
     padding: 12,
     marginBottom: 16,
   },
+  errorRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
   serverErrorText: {
     flex: 1,
     fontWeight: '600',
+    lineHeight: 18,
+  },
+  serverFixBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginTop: 10,
+  },
+  serverFixBtnText: {
+    color: '#991B1B',
+    fontSize: 12,
+    fontWeight: '700',
   },
   submitButton: {
     marginTop: 8,
@@ -278,10 +345,32 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 20,
-    marginBottom: 16,
+    marginBottom: 10,
   },
   footerText: {},
   footerLink: {
     fontWeight: '700',
+  },
+  serverPillWrapper: {
+    alignItems: 'center',
+    marginTop: 8,
+    marginBottom: 16,
+  },
+  serverPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+  },
+  serverDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: '#10B981',
+    marginRight: 8,
+  },
+  serverPillText: {
+    fontWeight: '600',
   },
 });
