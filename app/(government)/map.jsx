@@ -7,6 +7,7 @@ import {
   Dimensions,
   Image,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import MapView, { Marker, Callout, PROVIDER_DEFAULT } from 'react-native-maps';
