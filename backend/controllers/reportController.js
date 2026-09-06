@@ -519,7 +519,8 @@ const exportReportPdf = asyncHandler(async (req, res) => {
   }
 
   // Citizens can only export their own reports; government officials can export any
-  if (!report.user.equals(req.user._id) && req.user.role !== 'government') {
+  const reportOwnerId = report.user?._id || report.user;
+  if ((!reportOwnerId || !reportOwnerId.equals(req.user._id)) && req.user.role !== 'government') {
     throw new AppError('Access denied. You cannot export this work order.', 403);
   }
 

@@ -216,7 +216,8 @@ export const reportService = {
       window.URL.revokeObjectURL(blobUrl);
       return true;
     } else {
-      await Linking.openURL(url);
+      const mobileUrl = token ? `${url}?token=${encodeURIComponent(token)}` : url;
+      await Linking.openURL(mobileUrl);
       return true;
     }
   },

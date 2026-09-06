@@ -11,9 +11,9 @@ import {
 import { useRouter } from 'expo-router';
 import MapView, { Marker, Callout, PROVIDER_DEFAULT } from 'react-native-maps';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useReports } from '../../context/ReportContext';
 import { useTheme } from '../../theme/ThemeContext';
 import locationService from '../../services/locationService';
+import reportService from '../../services/reportService';
 import MapMarker from '../../components/MapMarker';
 import StatusBadge from '../../components/StatusBadge';
 import LoadingState from '../../components/LoadingState';
@@ -31,16 +31,17 @@ const MAP_CATEGORIES = [{ id: 'All', label: 'All', icon: 'view-grid-outline' }, 
 export default function MapScreen() {
   const router = useRouter();
   const mapRef = useRef(null);
-  const { reports, isLoading, fetchReports } = useReports();
   const { colors, borderRadius, spacing, fontSizes } = useTheme();
 
+  const [mapReports, setMapReports] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [userLocation, setUserLocation] = useState(null);
   const [selectedReport, setSelectedReport] = useState(null);
   const [isLocating, setIsLocating] = useState(false);
   const [mapCategory, setMapCategory] = useState('All');
 
   // Filter reports with valid coordinates
-  const validReports = reports.filter(
+  const validReports = mapReports.filter(
     (r) => typeof r.latitude === 'number' && typeof r.longitude === 'number'
   );
 
@@ -49,8 +50,22 @@ export default function MapScreen() {
     ? validReports
     : validReports.filter((r) => r.category === mapCategory);
 
+  const loadMapReports = async () => {
+    setIsLoading(true);
+    try {
+      const res = await reportService.getReports({ scope: 'all', limit: 100 });
+      if (res && res.reports) {
+        setMapReports(res.reports);
+      }
+    } catch (err) {
+      console.warn('[Map] Could not fetch map reports:', err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    fetchReports({ scope: 'all' });
+    loadMapReports();
     locateUser();
   }, []);
 

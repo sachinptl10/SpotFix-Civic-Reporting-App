@@ -204,14 +204,17 @@ export const ReportProvider = ({ children }) => {
     setReports((prev) => {
       const target = prev.find((r) => (r._id || r.id) === deletedId);
       if (target) {
-        setStats((s) => ({
-          ...s,
-          total: Math.max(0, s.total - 1),
-          resolved: target.status === 'Resolved' ? Math.max(0, s.resolved - 1) : s.resolved,
-          pending: (target.status === 'Pending' || target.status === 'Submitted' || target.status === 'In Progress' || target.status === 'Under Review')
-            ? Math.max(0, s.pending - 1)
-            : s.pending,
-        }));
+        setStats((s) => {
+          const statusLower = (target.status || '').toLowerCase();
+          return {
+            ...s,
+            total: Math.max(0, s.total - 1),
+            resolved: statusLower === 'resolved' ? Math.max(0, s.resolved - 1) : s.resolved,
+            pending: ['pending', 'submitted', 'in progress', 'under_review', 'under review', 'approved'].includes(statusLower)
+              ? Math.max(0, s.pending - 1)
+              : s.pending,
+          };
+        });
       }
       return prev.filter((r) => (r._id || r.id) !== deletedId);
     });

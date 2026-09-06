@@ -49,6 +49,41 @@ export const CATEGORIES = [
 ];
 
 export const STATUS_CONFIG = {
+  'pending': {
+    label: 'Pending',
+    color: '#3B82F6',
+    bgColor: '#EFF6FF',
+    borderColor: '#BFDBFE',
+    icon: 'clock-outline',
+  },
+  'under_review': {
+    label: 'Under Review',
+    color: '#8B5CF6',
+    bgColor: '#F5F3FF',
+    borderColor: '#DDD6FE',
+    icon: 'progress-clock',
+  },
+  'approved': {
+    label: 'Approved',
+    color: '#0284C7',
+    bgColor: '#F0F9FF',
+    borderColor: '#BAE6FD',
+    icon: 'check-decagram-outline',
+  },
+  'resolved': {
+    label: 'Resolved',
+    color: '#10B981',
+    bgColor: '#ECFDF5',
+    borderColor: '#A7F3D0',
+    icon: 'check-circle-outline',
+  },
+  'rejected': {
+    label: 'Rejected',
+    color: '#EF4444',
+    bgColor: '#FEF2F2',
+    borderColor: '#FECACA',
+    icon: 'close-circle-outline',
+  },
   'Pending': {
     label: 'Pending',
     color: '#3B82F6',
