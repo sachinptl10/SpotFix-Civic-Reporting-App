@@ -197,7 +197,7 @@ export default function CameraScreen() {
   const handlePickFromGallery = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: mode === 'video' ? ImagePicker.MediaTypeOptions.Videos : ImagePicker.MediaTypeOptions.All,
+        mediaTypes: mode === 'video' ? ['videos'] : ['images', 'videos'],
         allowsEditing: true,
         aspect: [4, 3],
         quality: 0.85,
