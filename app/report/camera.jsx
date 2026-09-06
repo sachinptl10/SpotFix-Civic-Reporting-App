@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Alert,
   Animated,
+  StatusBar,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { CameraView, useCameraPermissions } from 'expo-camera';
@@ -316,10 +317,12 @@ export default function CameraScreen() {
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#000000" translucent />
+
       {/* 1. Full-screen Camera Viewfinder Layer */}
       <CameraView
         ref={cameraRef}
-        style={StyleSheet.absoluteFill}
+        style={StyleSheet.absoluteFillObject}
         facing={facing}
         flash={flashMode}
         enableTorch={enableTorch}
@@ -329,7 +332,7 @@ export default function CameraScreen() {
 
       {/* 2. Tap to Focus Overlay */}
       <TouchableWithoutFeedback onPress={handleTapToFocus}>
-        <View style={StyleSheet.absoluteFill}>
+        <View style={StyleSheet.absoluteFillObject}>
           {focusPoint && (
             <Animated.View
               style={[
@@ -351,165 +354,190 @@ export default function CameraScreen() {
         </View>
       </TouchableWithoutFeedback>
 
-      {/* 3. Foreground Controls Overlay Layer (Always on top with zIndex: 999) */}
+      {/* 3. Pinned Top Header Bar (Fixed to Top) */}
       <View
         style={[
-          styles.overlayContainer,
-          {
-            paddingTop: insets.top + 8,
-            paddingBottom: Math.max(insets.bottom, 16) + 16,
-          },
+          styles.topBar,
+          { paddingTop: insets.top + 8 },
         ]}
-        pointerEvents="box-none"
       >
-        {/* Top Controls Bar */}
-        <View style={styles.topControls}>
+        {/* Close Button */}
+        <TouchableOpacity
+          onPress={handleCancel}
+          style={styles.topIconButton}
+          accessibilityLabel="Cancel photo capture"
+          activeOpacity={0.7}
+        >
+          <MaterialCommunityIcons name="close" size={24} color="#FFFFFF" />
+        </TouchableOpacity>
+
+        {/* Flash Toggle */}
+        <TouchableOpacity
+          onPress={toggleFlash}
+          style={[styles.topIconButton, flashMode !== 'off' && styles.topIconButtonActive]}
+          accessibilityLabel={`Flash ${flashMode}`}
+          activeOpacity={0.7}
+        >
+          <MaterialCommunityIcons
+            name={
+              flashMode === 'on'
+                ? 'flash'
+                : flashMode === 'auto'
+                ? 'flash-auto'
+                : 'flash-off'
+            }
+            size={22}
+            color={flashMode !== 'off' ? '#FBBF24' : '#FFFFFF'}
+          />
+        </TouchableOpacity>
+
+        {/* Zoom Step Button */}
+        <TouchableOpacity
+          onPress={cycleZoom}
+          style={styles.zoomButton}
+          accessibilityLabel={`Zoom ${getZoomLabel()}`}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.zoomText}>{getZoomLabel()}</Text>
+        </TouchableOpacity>
+
+        {/* Flip Camera Facing */}
+        <TouchableOpacity
+          onPress={toggleCameraFacing}
+          style={styles.topIconButton}
+          accessibilityLabel="Flip camera"
+          activeOpacity={0.7}
+        >
+          <MaterialCommunityIcons name="camera-flip-outline" size={22} color="#FFFFFF" />
+        </TouchableOpacity>
+      </View>
+
+      {/* 4. Floating Recording Pill (Active during video recording) */}
+      {isRecording && (
+        <View style={[styles.recordingPill, { top: insets.top + 68 }]}>
+          <View style={styles.recordingDot} />
+          <Text style={styles.recordingText}>
+            REC 00:{recordingSeconds < 10 ? `0${recordingSeconds}` : recordingSeconds} / 00:30
+          </Text>
+        </View>
+      )}
+
+      {/* 5. Pinned Universal Camera Footer Dock (Fixed to Bottom) */}
+      <View
+        style={[
+          styles.footerDock,
+          { paddingBottom: Math.max(insets.bottom, 16) + 12 },
+        ]}
+      >
+        {/* Mode Switcher: PHOTO | VIDEO */}
+        <View style={styles.modeSwitcherRow}>
           <TouchableOpacity
-            onPress={handleCancel}
-            style={styles.iconCircleButton}
-            accessibilityLabel="Cancel photo capture"
+            onPress={() => setMode('picture')}
+            disabled={isRecording}
+            style={styles.modeTab}
+            activeOpacity={0.8}
           >
-            <MaterialCommunityIcons name="close" size={26} color="#FFFFFF" />
+            <Text
+              style={[
+                styles.modeTabText,
+                mode === 'picture' && styles.modeTabTextActive,
+              ]}
+            >
+              PHOTO
+            </Text>
+            {mode === 'picture' && <View style={styles.modeActiveDot} />}
           </TouchableOpacity>
 
-          {/* Flash / Torch Toggle */}
           <TouchableOpacity
-            onPress={toggleFlash}
-            style={[styles.iconCircleButton, flashMode !== 'off' && styles.iconCircleActive]}
-            accessibilityLabel={`Flash ${flashMode}`}
+            onPress={() => setMode('video')}
+            disabled={isRecording}
+            style={styles.modeTab}
+            activeOpacity={0.8}
           >
-            <MaterialCommunityIcons
-              name={
-                flashMode === 'on'
-                  ? 'flash'
-                  : flashMode === 'auto'
-                  ? 'flash-auto'
-                  : 'flash-off'
-              }
-              size={22}
-              color={flashMode !== 'off' ? '#FBBF24' : '#FFFFFF'}
-            />
-          </TouchableOpacity>
-
-          {/* Zoom Step Button */}
-          <TouchableOpacity
-            onPress={cycleZoom}
-            style={styles.zoomButton}
-            accessibilityLabel={`Zoom ${getZoomLabel()}`}
-          >
-            <Text style={styles.zoomText}>{getZoomLabel()}</Text>
-          </TouchableOpacity>
-
-          {/* Flip Camera */}
-          <TouchableOpacity
-            onPress={toggleCameraFacing}
-            style={styles.iconCircleButton}
-            accessibilityLabel="Flip camera facing"
-          >
-            <MaterialCommunityIcons name="camera-flip-outline" size={22} color="#FFFFFF" />
+            <Text
+              style={[
+                styles.modeTabText,
+                mode === 'video' && styles.modeTabTextActive,
+              ]}
+            >
+              VIDEO
+            </Text>
+            {mode === 'video' && <View style={styles.modeActiveDot} />}
           </TouchableOpacity>
         </View>
 
-        {/* Center / Timer Alert if Recording */}
-        {isRecording && (
-          <View style={styles.recordingTimerPill}>
-            <View style={styles.recordingDot} />
-            <Text style={styles.recordingTimerText}>
-              Recording 00:{recordingSeconds < 10 ? `0${recordingSeconds}` : recordingSeconds} / 00:30
-            </Text>
-          </View>
-        )}
+        {/* Shutter & Side Controls Row */}
+        <View style={styles.shutterRow}>
+          {/* Gallery Button */}
+          <TouchableOpacity
+            onPress={handlePickFromGallery}
+            disabled={isRecording}
+            style={styles.sideControlCol}
+            accessibilityLabel="Pick from photo gallery"
+            activeOpacity={0.7}
+          >
+            <View style={styles.sideCircleButton}>
+              <MaterialCommunityIcons name="image-multiple" size={24} color="#FFFFFF" />
+            </View>
+            <Text style={styles.sideControlLabel}>Gallery</Text>
+          </TouchableOpacity>
 
-        {/* Bottom Bar: Mode Selector & Shutter */}
-        <View style={styles.bottomControls}>
-          {/* Mode Switcher: Photo / Video */}
-          <View style={styles.modeSwitcher}>
-            <TouchableOpacity
-              onPress={() => setMode('picture')}
-              disabled={isRecording}
-              style={[styles.modeTab, mode === 'picture' && styles.modeTabActive]}
-            >
-              <Text style={[styles.modeTabText, mode === 'picture' && styles.modeTabTextActive]}>
-                PHOTO
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => setMode('video')}
-              disabled={isRecording}
-              style={[styles.modeTab, mode === 'video' && styles.modeTabActive]}
-            >
-              <Text style={[styles.modeTabText, mode === 'video' && styles.modeTabTextActive]}>
-                VIDEO
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Shutter Row */}
-          <View style={styles.shutterRow}>
-            {/* Gallery Pick */}
-            <TouchableOpacity
-              onPress={handlePickFromGallery}
-              disabled={isRecording}
-              style={styles.controlWithLabel}
-              accessibilityLabel="Pick from photo library"
-            >
-              <View style={styles.iconCircleButton}>
-                <MaterialCommunityIcons name="image-multiple-outline" size={24} color="#FFFFFF" />
-              </View>
-              <Text style={styles.controlLabelText}>Gallery</Text>
-            </TouchableOpacity>
-
-            {/* Shutter Button with Camera Icon inside */}
-            <TouchableOpacity
-              onPress={handleShutterPress}
-              disabled={isCapturing}
-              activeOpacity={0.8}
+          {/* Universal Shutter Button */}
+          <TouchableOpacity
+            onPress={handleShutterPress}
+            disabled={isCapturing}
+            activeOpacity={0.85}
+            style={[
+              styles.shutterOuterRing,
+              mode === 'video' && styles.shutterOuterRingVideo,
+            ]}
+            accessibilityLabel={
+              mode === 'video'
+                ? isRecording
+                  ? 'Stop recording video'
+                  : 'Start recording video'
+                : 'Capture photograph'
+            }
+          >
+            <View
               style={[
-                styles.shutterOuter,
-                mode === 'video' && { borderColor: '#EF4444' },
+                styles.shutterInnerDisc,
+                mode === 'video' && styles.shutterInnerDiscVideo,
+                isRecording && styles.shutterInnerDiscRecording,
               ]}
-              accessibilityLabel={mode === 'video' ? (isRecording ? 'Stop video' : 'Record video') : 'Take photo'}
             >
-              <View
-                style={[
-                  styles.shutterInner,
-                  mode === 'video' && {
-                    backgroundColor: '#EF4444',
-                    borderRadius: isRecording ? 8 : 30,
-                    width: isRecording ? 28 : 58,
-                    height: isRecording ? 28 : 58,
-                  },
-                ]}
-              >
-                {isCapturing ? (
-                  <ActivityIndicator size="small" color="#2563EB" />
-                ) : mode === 'picture' ? (
-                  <MaterialCommunityIcons name="camera" size={32} color="#1E293B" />
-                ) : null}
-              </View>
-            </TouchableOpacity>
+              {isCapturing ? (
+                <ActivityIndicator size="small" color="#1E293B" />
+              ) : mode === 'picture' ? (
+                <MaterialCommunityIcons name="camera" size={32} color="#1E293B" />
+              ) : null}
+            </View>
+          </TouchableOpacity>
 
-            {/* System Camera Direct Access */}
-            <TouchableOpacity
-              onPress={handleLaunchSystemCamera}
-              disabled={isRecording}
-              style={styles.controlWithLabel}
-              accessibilityLabel="Switch to system camera app"
-            >
-              <View style={styles.iconCircleButton}>
-                <MaterialCommunityIcons name="camera-iris" size={24} color="#FFFFFF" />
-              </View>
-              <Text style={styles.controlLabelText}>System</Text>
-            </TouchableOpacity>
-          </View>
+          {/* System Camera Direct Access */}
+          <TouchableOpacity
+            onPress={handleLaunchSystemCamera}
+            disabled={isRecording}
+            style={styles.sideControlCol}
+            accessibilityLabel="Open system camera directly"
+            activeOpacity={0.7}
+          >
+            <View style={styles.sideCircleButton}>
+              <MaterialCommunityIcons name="camera-iris" size={24} color="#FFFFFF" />
+            </View>
+            <Text style={styles.sideControlLabel}>System</Text>
+          </TouchableOpacity>
+        </View>
 
-          {/* Explicit Helper Text: TAP TO CLICK PHOTO */}
-          <View style={styles.tapToSnapBadge}>
-            <Text style={styles.tapToSnapText}>
-              {mode === 'picture' ? 'TAP WHITE BUTTON TO CLICK PHOTO' : 'TAP RED BUTTON TO RECORD VIDEO'}
-            </Text>
-          </View>
+        {/* Helper Guidance Badge */}
+        <View style={styles.hintBadge}>
+          <Text style={styles.hintBadgeText}>
+            {mode === 'picture'
+              ? 'TAP SHUTTER TO CLICK PHOTO'
+              : isRecording
+              ? 'RECORDING • TAP RED BUTTON TO STOP'
+              : 'TAP RED BUTTON TO RECORD VIDEO'}
+          </Text>
         </View>
       </View>
     </View>
@@ -521,52 +549,42 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000000',
   },
-  overlayContainer: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'space-between',
-    zIndex: 999,
-    elevation: 20,
-  },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 16,
+    padding: 20,
   },
   loadingText: {
-    marginTop: 16,
     fontSize: 14,
+    fontWeight: '500',
   },
-  topControls: {
+  galleryFallbackButton: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    marginTop: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    backgroundColor: 'rgba(37, 99, 235, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(37, 99, 235, 0.25)',
   },
-  iconCircleButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(0, 0, 0, 0.55)',
-    justifyContent: 'center',
-    alignItems: 'center',
+  galleryFallbackText: {
+    fontWeight: '600',
+    fontSize: 14,
+    marginLeft: 8,
   },
-  iconCircleActive: {
-    backgroundColor: 'rgba(245, 158, 11, 0.3)',
-    borderWidth: 1.5,
-    borderColor: '#F59E0B',
+  cancelFallback: {
+    marginTop: 16,
+    padding: 8,
   },
-  zoomButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 9999,
-    backgroundColor: 'rgba(0, 0, 0, 0.55)',
+  cancelFallbackText: {
+    fontSize: 14,
+    fontWeight: '500',
   },
-  zoomText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-    fontSize: 13,
-  },
+
+  // Focus Ring
   focusBox: {
     position: 'absolute',
     width: 60,
@@ -614,122 +632,206 @@ const styles = StyleSheet.create({
     borderRightWidth: 3,
     borderColor: '#FBBF24',
   },
-  recordingTimerPill: {
+
+  // Fixed Top Header Bar
+  topBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 50,
+    elevation: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingBottom: 12,
+  },
+  topIconButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  topIconButtonActive: {
+    backgroundColor: 'rgba(251, 191, 36, 0.25)',
+    borderWidth: 1.5,
+    borderColor: '#FBBF24',
+  },
+  zoomButton: {
+    minWidth: 46,
+    height: 44,
+    paddingHorizontal: 14,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  zoomText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 14,
+    letterSpacing: 0.5,
+  },
+
+  // Floating Recording Pill
+  recordingPill: {
+    position: 'absolute',
     alignSelf: 'center',
+    zIndex: 60,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(239, 68, 68, 0.85)',
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 9999,
+    backgroundColor: 'rgba(239, 68, 68, 0.92)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 24,
+    shadowColor: '#EF4444',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 6,
   },
   recordingDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
     backgroundColor: '#FFFFFF',
     marginRight: 8,
   },
-  recordingTimerText: {
+  recordingText: {
     color: '#FFFFFF',
-    fontWeight: '700',
+    fontWeight: '800',
     fontSize: 13,
-  },
-  bottomControls: {
-    alignItems: 'center',
-    gap: 16,
-  },
-  modeSwitcher: {
-    flexDirection: 'row',
-    backgroundColor: 'rgba(0, 0, 0, 0.55)',
-    borderRadius: 9999,
-    padding: 3,
-  },
-  modeTab: {
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderRadius: 9999,
-  },
-  modeTabActive: {
-    backgroundColor: '#FFFFFF',
-  },
-  modeTabText: {
-    color: '#E2E8F0',
-    fontSize: 12,
-    fontWeight: '700',
     letterSpacing: 0.5,
   },
-  modeTabTextActive: {
-    color: '#0F172A',
+
+  // Pinned Bottom Universal Camera Footer Dock
+  footerDock: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    zIndex: 50,
+    elevation: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.88)',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.12)',
+    paddingTop: 16,
+    alignItems: 'center',
   },
+
+  // Mode Switcher (PHOTO | VIDEO)
+  modeSwitcherRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 36,
+    marginBottom: 16,
+  },
+  modeTab: {
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  modeTabText: {
+    color: '#94A3B8',
+    fontSize: 13,
+    fontWeight: '600',
+    letterSpacing: 1.5,
+  },
+  modeTabTextActive: {
+    color: '#FBBF24',
+    fontWeight: '800',
+  },
+  modeActiveDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#FBBF24',
+    marginTop: 4,
+  },
+
+  // Shutter & Controls Row
   shutterRow: {
     width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: 32,
   },
-  shutterOuter: {
-    width: 78,
-    height: 78,
-    borderRadius: 39,
-    borderWidth: 4,
-    borderColor: '#FFFFFF',
+  sideControlCol: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 64,
+  },
+  sideCircleButton: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  shutterInner: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+  sideControlLabel: {
+    color: '#E2E8F0',
+    fontSize: 11,
+    fontWeight: '600',
+    marginTop: 6,
+    letterSpacing: 0.3,
+  },
+
+  // Universal Shutter Button
+  shutterOuterRing: {
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    borderWidth: 4,
+    borderColor: '#FFFFFF',
+    padding: 3,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+  },
+  shutterOuterRingVideo: {
+    borderColor: '#EF4444',
+  },
+  shutterInnerDisc: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
     backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  galleryFallbackButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 16,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+  shutterInnerDiscVideo: {
+    backgroundColor: '#EF4444',
   },
-  galleryFallbackText: {
-    fontWeight: '600',
-    fontSize: 14,
-    marginLeft: 6,
+  shutterInnerDiscRecording: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: '#EF4444',
   },
-  cancelFallback: {
-    marginTop: 8,
-    padding: 8,
-  },
-  cancelFallbackText: {
-    fontSize: 14,
-  },
-  controlWithLabel: {
-    alignItems: 'center',
-    gap: 4,
-  },
-  controlLabelText: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '600',
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
-  },
-  tapToSnapBadge: {
-    backgroundColor: 'rgba(0, 0, 0, 0.65)',
+
+  // Helper Hint Badge
+  hintBadge: {
+    marginTop: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
     paddingHorizontal: 16,
     paddingVertical: 5,
-    borderRadius: 9999,
-    marginTop: 4,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: 'rgba(255, 255, 255, 0.12)',
   },
-  tapToSnapText: {
-    color: '#FFFFFF',
-    fontSize: 11,
+  hintBadgeText: {
+    color: '#CBD5E1',
+    fontSize: 10,
     fontWeight: '700',
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
   },
 });
