@@ -189,9 +189,20 @@ export const apiRequest = async (endpoint, options = {}) => {
     }
   }
 
+  const isFormData = Boolean(
+    options.body &&
+      (options.body instanceof FormData ||
+        typeof options.body.append === 'function' ||
+        options.body?._parts ||
+        options.body?.constructor?.name === 'FormData')
+  );
+
   // Set Content-Type to application/json unless it's FormData
-  if (!(options.body instanceof FormData) && !headers['Content-Type']) {
+  if (!isFormData && !headers['Content-Type']) {
     headers['Content-Type'] = 'application/json';
+  } else if (isFormData) {
+    // Ensure Content-Type is NOT set so fetch automatically computes the multipart boundary
+    delete headers['Content-Type'];
   }
 
   const fetchOptions = {
@@ -200,7 +211,7 @@ export const apiRequest = async (endpoint, options = {}) => {
     ...options,
   };
 
-  if (options.body && !(options.body instanceof FormData) && typeof options.body === 'object') {
+  if (options.body && !isFormData && typeof options.body === 'object') {
     fetchOptions.body = JSON.stringify(options.body);
   }
 

@@ -90,10 +90,7 @@ export const validateReportForm = ({ title, category, description, imageUri, loc
     errors.description = 'Description must be at least 10 characters.';
   }
 
-  if (!imageUri) {
-    errors.image = 'An issue photograph is required.';
-  }
-
+  // Location is required
   if (!location || typeof location.latitude !== 'number' || typeof location.longitude !== 'number') {
     errors.location = 'Valid GPS location coordinates are required.';
   }

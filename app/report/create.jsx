@@ -34,6 +34,7 @@ export default function CreateReportScreen() {
   const toast = useToast();
 
   const mapRef = useRef(null);
+  const scrollRef = useRef(null);
 
   // Attached Media State (Reactive & Updatable in Form)
   const [currentImageUri, setCurrentImageUri] = useState(params.imageUri || '');
@@ -203,6 +204,7 @@ export default function CreateReportScreen() {
   };
 
   const handleSubmit = async () => {
+    // 1. Validate form fields
     const validation = validateReportForm({
       title,
       category,
@@ -213,10 +215,45 @@ export default function CreateReportScreen() {
 
     if (!validation.isValid) {
       setErrors(validation.errors);
-      toast.showError('Please correct the highlighted form errors.');
+      scrollRef.current?.scrollTo({ y: 0, animated: true });
+
+      const errorList = Object.values(validation.errors).filter(Boolean);
+      Alert.alert(
+        'Incomplete Form Details',
+        errorList.length > 0 ? errorList.join('\n\n') : 'Please fill in all required fields marked with *.'
+      );
+      toast.showError('Please check highlighted form fields.');
       return;
     }
 
+    // 2. If no photo is attached, prompt citizen if they want to attach one or submit directly
+    if (!currentImageUri) {
+      Alert.alert(
+        'Submit Without Photo Evidence?',
+        'Attaching a photograph helps municipal crews verify and repair issues much faster. Would you like to snap a photo or submit without one?',
+        [
+          {
+            text: 'Snap Photo',
+            onPress: () => handleCapturePhoto(),
+          },
+          {
+            text: 'Submit Anyway',
+            style: 'default',
+            onPress: () => executeSubmission(),
+          },
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+        ]
+      );
+      return;
+    }
+
+    await executeSubmission();
+  };
+
+  const executeSubmission = async () => {
     setErrors({});
     setIsSubmitting(true);
 
@@ -225,11 +262,11 @@ export default function CreateReportScreen() {
         title: title.trim(),
         category,
         description: description.trim(),
-        latitude: location.latitude,
-        longitude: location.longitude,
-        address: address || `${location.latitude.toFixed(5)}, ${location.longitude.toFixed(5)}`,
-        imageUri: currentImageUri,
-        mediaType: currentMediaType,
+        latitude: location?.latitude || 0,
+        longitude: location?.longitude || 0,
+        address: address || `${(location?.latitude || 0).toFixed(5)}, ${(location?.longitude || 0).toFixed(5)}`,
+        imageUri: currentImageUri || '',
+        mediaType: currentMediaType || 'image',
       });
 
       if (result && result.report) {
@@ -239,13 +276,18 @@ export default function CreateReportScreen() {
       }
 
       toast.showSuccess('Report submitted successfully!');
-      router.replace('/(tabs)/home');
+      Alert.alert(
+        'Report Submitted!',
+        `Your report #${result?.report?.reportNumber || ''} has been submitted for municipal review.`,
+        [{ text: 'OK', onPress: () => router.replace('/(tabs)/home') }]
+      );
     } catch (err) {
       console.warn('[CreateReport] Submission error:', err);
       const msg = getErrorMessage(err, 'Failed to submit report. Please try again.');
       if (err.errors) {
         setErrors(err.errors);
       }
+      Alert.alert('Submission Error', msg);
       toast.showError(msg);
     } finally {
       setIsSubmitting(false);
@@ -260,6 +302,7 @@ export default function CreateReportScreen() {
       style={[styles.container, { backgroundColor: colors.background }]}
     >
       <ScrollView
+        ref={scrollRef}
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -599,6 +642,57 @@ export default function CreateReportScreen() {
           />
         </View>
 
+        {/* Photo Status Pill above Submit Button */}
+        {!currentImageUri ? (
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={handleCapturePhoto}
+            style={[
+              styles.bottomPhotoPrompt,
+              {
+                backgroundColor: colors.surfaceSubtle,
+                borderColor: colors.border,
+                borderRadius: borderRadius.md,
+                padding: spacing.md,
+                marginBottom: spacing.md,
+              },
+            ]}
+          >
+            <View style={styles.bottomPhotoPromptLeft}>
+              <View style={[styles.bottomCameraIconCircle, { backgroundColor: colors.primary }]}>
+                <MaterialCommunityIcons name="camera-plus" size={18} color="#FFFFFF" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.bottomPhotoPromptTitle, { color: colors.textPrimary, fontSize: fontSizes.sm }]}>
+                  No Photo Attached
+                </Text>
+                <Text style={[styles.bottomPhotoPromptSub, { color: colors.textSecondary, fontSize: fontSizes.xs }]}>
+                  Tap here to snap or pick a photo of the defect
+                </Text>
+              </View>
+            </View>
+            <MaterialCommunityIcons name="chevron-right" size={20} color={colors.primary} />
+          </TouchableOpacity>
+        ) : (
+          <View
+            style={[
+              styles.bottomPhotoAttachedPill,
+              {
+                backgroundColor: '#ECFDF5',
+                borderColor: '#A7F3D0',
+                borderRadius: borderRadius.md,
+                padding: spacing.sm,
+                marginBottom: spacing.md,
+              },
+            ]}
+          >
+            <MaterialCommunityIcons name="check-circle" size={18} color="#10B981" style={{ marginRight: 8 }} />
+            <Text style={[styles.bottomPhotoAttachedText, { color: '#065F46', fontSize: fontSizes.xs }]}>
+              {currentMediaType === 'video' ? 'Video Evidence Attached' : 'Photo Evidence Attached'}
+            </Text>
+          </View>
+        )}
+
         {/* Submission Action */}
         <View style={styles.actionContainer}>
           <CustomButton
@@ -906,5 +1000,40 @@ const styles = StyleSheet.create({
   },
   errorText: {
     marginTop: 4,
+  },
+  bottomPhotoPrompt: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+  },
+  bottomPhotoPromptLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 10,
+  },
+  bottomCameraIconCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  bottomPhotoPromptTitle: {
+    fontWeight: '700',
+    marginBottom: 2,
+  },
+  bottomPhotoPromptSub: {
+    lineHeight: 16,
+  },
+  bottomPhotoAttachedPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+  },
+  bottomPhotoAttachedText: {
+    fontWeight: '700',
   },
 });
