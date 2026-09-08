@@ -1,0 +1,606 @@
+[
+  {
+    "id": "SP-10021",
+    "reportNumber": "#SP-10021",
+    "title": "Massive Crater Pothole on Outer Ring Road Flyover",
+    "description": "Deep asphalt depression causing heavy traffic slowdowns and severe accident risk for two-wheelers during monsoon rains.",
+    "category": "Pothole",
+    "status": "pending",
+    "priority": "high",
+    "imageUrl": "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=800&auto=format&fit=crop&q=80",
+    "address": "Outer Ring Road, near Kadubeesanahalli Underpass, Ward 85",
+    "location": { "latitude": 12.9372, "longitude": 77.6912 },
+    "citizen": {
+      "name": "Kavita Rao",
+      "phone": "+91 98450 12345",
+      "email": "kavita.rao@example.com",
+      "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&auto=format&fit=crop&q=80"
+    },
+    "createdAt": "2026-09-08T08:15:00.000Z",
+    "slaHours": 24,
+    "slaDeadline": "2026-09-09T08:15:00.000Z",
+    "statusHistory": [
+      {
+        "status": "pending",
+        "timestamp": "2026-09-08T08:15:00.000Z",
+        "changedBy": "Citizen (Mobile App)",
+        "note": "Issue reported with geo-tagged photograph."
+      }
+    ]
+  },
+  {
+    "id": "SP-10022",
+    "reportNumber": "#SP-10022",
+    "title": "Overflowing Commercial Garbage Dumpster Blocking Sidewalk",
+    "description": "Commercial waste accumulating outside market gate for 4 days. Strong odor and stray animal menace obstructing pedestrians.",
+    "category": "Garbage",
+    "status": "pending",
+    "priority": "medium",
+    "imageUrl": "https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80",
+    "address": "12th Main Road, HAL 2nd Stage, Indiranagar, Ward 112",
+    "location": { "latitude": 12.9719, "longitude": 77.6412 },
+    "citizen": {
+      "name": "Arjun Nair",
+      "phone": "+91 98860 67890",
+      "email": "arjun.nair@example.com",
+      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80"
+    },
+    "createdAt": "2026-09-08T06:30:00.000Z",
+    "slaHours": 48,
+    "slaDeadline": "2026-09-10T06:30:00.000Z",
+    "statusHistory": [
+      {
+        "status": "pending",
+        "timestamp": "2026-09-08T06:30:00.000Z",
+        "changedBy": "Citizen (Mobile App)",
+        "note": "Report submitted."
+      }
+    ]
+  },
+  {
+    "id": "SP-10023",
+    "reportNumber": "#SP-10023",
+    "title": "High-Pressure Underground Drinking Water Pipeline Burst",
+    "description": "Continuous drinking water gushing onto the road, flooding adjacent basements and wasting hundreds of liters of potable water.",
+    "category": "Water Leakage",
+    "status": "under_review",
+    "priority": "high",
+    "imageUrl": "https://images.unsplash.com/photo-1541888946425-d0fbb186c5f8?w=800&auto=format&fit=crop&q=80",
+    "address": "4th Cross, 80 Feet Road, 4th Block Koramangala, Ward 151",
+    "location": { "latitude": 12.9345, "longitude": 77.6251 },
+    "citizen": {
+      "name": "Siddharth Mehta",
+      "phone": "+91 99001 23456",
+      "email": "siddharth.m@example.com",
+      "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&auto=format&fit=crop&q=80"
+    },
+    "createdAt": "2026-09-07T14:20:00.000Z",
+    "slaHours": 12,
+    "slaDeadline": "2026-09-08T02:20:00.000Z",
+    "statusHistory": [
+      {
+        "status": "pending",
+        "timestamp": "2026-09-07T14:20:00.000Z",
+        "changedBy": "Citizen (Mobile App)",
+        "note": "Emergency water leak flagged."
+      },
+      {
+        "status": "under_review",
+        "timestamp": "2026-09-07T16:00:00.000Z",
+        "changedBy": "Officer Rajesh V. (Water Supply Dept)",
+        "note": "Field inspector alerted to isolate main valve."
+      }
+    ]
+  },
+  {
+    "id": "SP-10024",
+    "reportNumber": "#SP-10024",
+    "title": "Row of 4 Streetlights Non-Functional on School Road",
+    "description": "Complete blackout stretch creating unsafe conditions for evening students and women returning from Metro station.",
+    "category": "Broken Streetlight",
+    "status": "under_review",
+    "priority": "medium",
+    "imageUrl": "https://images.unsplash.com/photo-1517411032315-54ef2cb783bb?w=800&auto=format&fit=crop&q=80",
+    "address": "17th Main Road, Sector 3, HSR Layout, Ward 174",
+    "location": { "latitude": 12.9115, "longitude": 77.6432 },
+    "citizen": {
+      "name": "Pooja Hegde",
+      "phone": "+91 97412 34567",
+      "email": "pooja.h@example.com",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80"
+    },
+    "createdAt": "2026-09-07T18:45:00.000Z",
+    "slaHours": 48,
+    "slaDeadline": "2026-09-09T18:45:00.000Z",
+    "statusHistory": [
+      {
+        "status": "pending",
+        "timestamp": "2026-09-07T18:45:00.000Z",
+        "changedBy": "Citizen",
+        "note": "Reported."
+      },
+      {
+        "status": "under_review",
+        "timestamp": "2026-09-08T09:10:00.000Z",
+        "changedBy": "Officer Ananya Sen (Electrical)",
+        "note": "Assigned to BESCOM maintenance squad #4."
+      }
+    ]
+  },
+  {
+    "id": "SP-10025",
+    "reportNumber": "#SP-10025",
+    "title": "Severe Stormwater Drain Clogged with Construction Debris",
+    "description": "Monsoon drain choked with cement sacks and gravel causing knee-deep water-logging during recent rainfall.",
+    "category": "Drainage Problem",
+    "status": "approved",
+    "priority": "high",
+    "imageUrl": "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&auto=format&fit=crop&q=80",
+    "address": "Margosa Road, near 8th Cross, Malleshwaram, Ward 45",
+    "location": { "latitude": 13.0035, "longitude": 77.5682 },
+    "citizen": {
+      "name": "Venkatesh Prasad",
+      "phone": "+91 94480 11223",
+      "email": "v.prasad@example.com",
+      "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=120&auto=format&fit=crop&q=80"
+    },
+    "createdAt": "2026-09-06T11:00:00.000Z",
+    "slaHours": 36,
+    "slaDeadline": "2026-09-07T23:00:00.000Z",
+    "statusHistory": [
+      {
+        "status": "pending",
+        "timestamp": "2026-09-06T11:00:00.000Z",
+        "changedBy": "Citizen",
+        "note": "Report submitted."
+      },
+      {
+        "status": "under_review",
+        "timestamp": "2026-09-06T14:30:00.000Z",
+        "changedBy": "Officer Ramesh Gowda (Stormwater)",
+        "note": "Inspected on site. High flooding hazard confirmed."
+      },
+      {
+        "status": "approved",
+        "timestamp": "2026-09-07T10:00:00.000Z",
+        "changedBy": "Executive Engineer K. Murthy",
+        "note": "Contractor work order #WO-9912 dispatched with JCB excavator."
+      }
+    ]
+  },
+  {
+    "id": "SP-10026",
+    "reportNumber": "#SP-10026",
+    "title": "Damaged Footpath Slabs and Exposed Rebar",
+    "description": "Multiple granite sidewalk pavers broken with exposed iron rebar. Poses trip hazard for senior citizens and joggers.",
+    "category": "Damaged Road",
+    "status": "approved",
+    "priority": "medium",
+    "imageUrl": "https://images.unsplash.com/photo-1590674899484-d5640e854abe?w=800&auto=format&fit=crop&q=80",
+    "address": "11th Main, 4th T Block, Jayanagar, Ward 168",
+    "location": { "latitude": 12.9298, "longitude": 77.5842 },
+    "citizen": {
+      "name": "Meera Iyer",
+      "phone": "+91 98451 99887",
+      "email": "meera.iyer@example.com",
+      "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120&auto=format&fit=crop&q=80"
+    },
+    "createdAt": "2026-09-06T15:20:00.000Z",
+    "slaHours": 72,
+    "slaDeadline": "2026-09-09T15:20:00.000Z",
+    "statusHistory": [
+      {
+        "status": "pending",
+        "timestamp": "2026-09-06T15:20:00.000Z",
+        "changedBy": "Citizen",
+        "note": "Reported."
+      },
+      {
+        "status": "under_review",
+        "timestamp": "2026-09-07T11:00:00.000Z",
+        "changedBy": "Officer Deepa S.",
+        "note": "Ward civil squad surveyed footpath."
+      },
+      {
+        "status": "approved",
+        "timestamp": "2026-09-08T09:00:00.000Z",
+        "changedBy": "Asst. Engineer Mohan",
+        "note": "Replacement pavers scheduled for installation."
+      }
+    ]
+  },
+  {
+    "id": "SP-10027",
+    "reportNumber": "#SP-10027",
+    "title": "Broken Park Safety Railing at Community Lake",
+    "description": "Metal safety railing rusted and snapped along walking track beside the deep water embankment.",
+    "category": "Public Property Damage",
+    "status": "approved",
+    "priority": "high",
+    "imageUrl": "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=800&auto=format&fit=crop&q=80",
+    "address": "Sankey Tank Perimeter Track, Sadashivanagar, Ward 35",
+    "location": { "latitude": 13.0084, "longitude": 77.5739 },
+    "citizen": {
+      "name": "Girish Kulkarni",
+      "phone": "+91 99800 55443",
+      "email": "girish.k@example.com",
+      "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=120&auto=format&fit=crop&q=80"
+    },
+    "createdAt": "2026-09-06T09:00:00.000Z",
+    "slaHours": 48,
+    "slaDeadline": "2026-09-08T09:00:00.000Z",
+    "statusHistory": [
+      {
+        "status": "pending",
+        "timestamp": "2026-09-06T09:00:00.000Z",
+        "changedBy": "Citizen",
+        "note": "Lake boundary railing hazard reported."
+      },
+      {
+        "status": "under_review",
+        "timestamp": "2026-09-06T12:00:00.000Z",
+        "changedBy": "Horticulture & Parks Dept",
+        "note": "Inspection verified barrier broken."
+      },
+      {
+        "status": "approved",
+        "timestamp": "2026-09-07T08:30:00.000Z",
+        "changedBy": "Ward Supervisor L. Patil",
+        "note": "Welding and replacement contract allocated."
+      }
+    ]
+  },
+  {
+    "id": "SP-10028",
+    "reportNumber": "#SP-10028",
+    "title": "Deep Pothole Repaired with Hot-Mix Asphalt",
+    "description": "Hazardous road depression filled, compacted, and leveled to prevent vehicular damage and water accumulation.",
+    "category": "Pothole",
+    "status": "resolved",
+    "priority": "high",
+    "imageUrl": "https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?w=800&auto=format&fit=crop&q=80",
+    "resolutionImageUrl": "https://images.unsplash.com/photo-1584463699039-446dfa6104df?w=800&auto=format&fit=crop&q=80",
+    "resolutionNote": "Hot-mix asphalt laid and roller compacted. Surface leveled with road grading standards. Open for normal traffic.",
+    "address": "Koramangala 100ft Road, near Sony World Signal, Ward 151",
+    "location": { "latitude": 12.9358, "longitude": 77.6289 },
+    "citizen": {
+      "name": "Nikhil Bose",
+      "phone": "+91 98450 77112",
+      "email": "nikhil.b@example.com",
+      "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=120&auto=format&fit=crop&q=80"
+    },
+    "createdAt": "2026-09-04T10:00:00.000Z",
+    "resolvedAt": "2026-09-06T16:30:00.000Z",
+    "slaHours": 48,
+    "slaDeadline": "2026-09-06T10:00:00.000Z",
+    "statusHistory": [
+      { "status": "pending", "timestamp": "2026-09-04T10:00:00.000Z", "changedBy": "Citizen", "note": "Reported." },
+      { "status": "under_review", "timestamp": "2026-09-04T13:00:00.000Z", "changedBy": "Officer T. Rao", "note": "Verified." },
+      { "status": "approved", "timestamp": "2026-09-05T09:00:00.000Z", "changedBy": "Chief Engineer", "note": "Assigned to Quick Fix asphalt crew." },
+      { "status": "resolved", "timestamp": "2026-09-06T16:30:00.000Z", "changedBy": "Officer T. Rao", "note": "Quality check passed, verified with after-repair photograph." }
+    ]
+  },
+  {
+    "id": "SP-10029",
+    "reportNumber": "#SP-10029",
+    "title": "Community Dumpster Cleared and Sanitized",
+    "description": "Overflowing waste cleared by municipal compactor trucks, area bleached and disinfected.",
+    "category": "Garbage",
+    "status": "resolved",
+    "priority": "medium",
+    "imageUrl": "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=800&auto=format&fit=crop&q=80",
+    "resolutionImageUrl": "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800&auto=format&fit=crop&q=80",
+    "resolutionNote": "2 tons of legacy waste carted away to processing plant. Disinfection powder spread. Signage installed against illegal dumping.",
+    "address": "Binnamangala 1st Stage, Indiranagar, Ward 112",
+    "location": { "latitude": 12.9774, "longitude": 77.6358 },
+    "citizen": {
+      "name": "Divya Swaminathan",
+      "phone": "+91 97400 33881",
+      "email": "divya.s@example.com",
+      "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=120&auto=format&fit=crop&q=80"
+    },
+    "createdAt": "2026-09-05T08:00:00.000Z",
+    "resolvedAt": "2026-09-06T14:00:00.000Z",
+    "slaHours": 24,
+    "slaDeadline": "2026-09-06T08:00:00.000Z",
+    "statusHistory": [
+      { "status": "pending", "timestamp": "2026-09-05T08:00:00.000Z", "changedBy": "Citizen", "note": "Reported." },
+      { "status": "under_review", "timestamp": "2026-09-05T10:30:00.000Z", "changedBy": "Solid Waste Management Unit", "note": "Compactor routed." },
+      { "status": "approved", "timestamp": "2026-09-05T12:00:00.000Z", "changedBy": "Sanitation Inspector", "note": "Clean-up team dispatched." },
+      { "status": "resolved", "timestamp": "2026-09-06T14:00:00.000Z", "changedBy": "Sanitation Inspector", "note": "Cleaned and sanitized." }
+    ]
+  },
+  {
+    "id": "SP-10030",
+    "reportNumber": "#SP-10030",
+    "title": "Private Society Compound Wall Repair Request",
+    "description": "Citizen requested municipal repairs for private apartment boundary wall crack.",
+    "category": "Public Property Damage",
+    "status": "rejected",
+    "priority": "low",
+    "imageUrl": "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=800&auto=format&fit=crop&q=80",
+    "rejectionReason": "Private property issue. Municipal public works funds cannot be utilized for private residential society structures.",
+    "address": "Green Glen Layout, Bellandur, Ward 150",
+    "location": { "latitude": 12.9264, "longitude": 77.6758 },
+    "citizen": {
+      "name": "Prateek Mathur",
+      "phone": "+91 99160 44332",
+      "email": "prateek.m@example.com",
+      "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=120&auto=format&fit=crop&q=80"
+    },
+    "createdAt": "2026-09-06T14:00:00.000Z",
+    "rejectedAt": "2026-09-07T10:15:00.000Z",
+    "slaHours": 48,
+    "slaDeadline": "2026-09-08T14:00:00.000Z",
+    "statusHistory": [
+      { "status": "pending", "timestamp": "2026-09-06T14:00:00.000Z", "changedBy": "Citizen", "note": "Reported." },
+      { "status": "under_review", "timestamp": "2026-09-07T09:30:00.000Z", "changedBy": "Ward Revenue Inspector", "note": "Verified land records." },
+      { "status": "rejected", "timestamp": "2026-09-07T10:15:00.000Z", "changedBy": "Ward Revenue Inspector", "note": "Rejected: Private property issue." }
+    ]
+  },
+  {
+    "id": "SP-10031",
+    "reportNumber": "#SP-10031",
+    "title": "Duplicate Report: Water Pipeline Leakage at 4th Block",
+    "description": "Same water leakage already logged under active priority work ticket #SP-10023.",
+    "category": "Water Leakage",
+    "status": "rejected",
+    "priority": "low",
+    "imageUrl": "https://images.unsplash.com/photo-1541888946425-d0fbb186c5f8?w=800&auto=format&fit=crop&q=80",
+    "rejectionReason": "Duplicate report. Already tracked under parent work order #SP-10023.",
+    "address": "4th Cross, 80 Feet Road, Koramangala, Ward 151",
+    "location": { "latitude": 12.9348, "longitude": 77.6253 },
+    "citizen": {
+      "name": "Sameer Joshi",
+      "phone": "+91 98440 22110",
+      "email": "sameer.j@example.com",
+      "avatar": "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=120&auto=format&fit=crop&q=80"
+    },
+    "createdAt": "2026-09-07T16:00:00.000Z",
+    "rejectedAt": "2026-09-07T17:30:00.000Z",
+    "slaHours": 24,
+    "slaDeadline": "2026-09-08T16:00:00.000Z",
+    "statusHistory": [
+      { "status": "pending", "timestamp": "2026-09-07T16:00:00.000Z", "changedBy": "Citizen", "note": "Reported." },
+      { "status": "rejected", "timestamp": "2026-09-07T17:30:00.000Z", "changedBy": "Triage Officer A. Khan", "note": "Duplicate of SP-10023." }
+    ]
+  },
+  {
+    "id": "SP-10032",
+    "reportNumber": "#SP-10032",
+    "title": "Burned-out High-Mast Light Bulb Replaced with LED",
+    "description": "All 4 sodium vapor fixtures upgraded to 150W energy efficient LED modules.",
+    "category": "Broken Streetlight",
+    "status": "resolved",
+    "priority": "medium",
+    "imageUrl": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=800&auto=format&fit=crop&q=80",
+    "resolutionImageUrl": "https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=800&auto=format&fit=crop&q=80",
+    "resolutionNote": "New LED fixtures installed and automated day/night sensor calibrated. High mast junction box sealed against water ingress.",
+    "address": "Hebbal Flyover Junction, Outer Ring Road, Ward 7",
+    "location": { "latitude": 13.0362, "longitude": 77.5975 },
+    "citizen": {
+      "name": "Farhan Akhtar",
+      "phone": "+91 99011 88442",
+      "email": "farhan.a@example.com",
+      "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=120&auto=format&fit=crop&q=80"
+    },
+    "createdAt": "2026-09-03T19:00:00.000Z",
+    "resolvedAt": "2026-09-05T21:00:00.000Z",
+    "slaHours": 48,
+    "slaDeadline": "2026-09-05T19:00:00.000Z",
+    "statusHistory": [
+      { "status": "pending", "timestamp": "2026-09-03T19:00:00.000Z", "changedBy": "Citizen", "note": "Reported." },
+      { "status": "under_review", "timestamp": "2026-09-04T09:00:00.000Z", "changedBy": "Electrical Squad", "note": "Boom lift requested." },
+      { "status": "approved", "timestamp": "2026-09-04T14:00:00.000Z", "changedBy": "Supervisor", "note": "Scheduled." },
+      { "status": "resolved", "timestamp": "2026-09-05T21:00:00.000Z", "changedBy": "Electrical Squad", "note": "Tested and operational." }
+    ]
+  },
+  {
+    "id": "SP-10033",
+    "reportNumber": "#SP-10033",
+    "title": "Damaged Road Median Concrete Block Broken",
+    "description": "Collision damaged concrete divider blocks strewn onto active fast lane, creating imminent collision risk.",
+    "category": "Damaged Road",
+    "status": "pending",
+    "priority": "high",
+    "imageUrl": "https://images.unsplash.com/photo-1545459720-aac8509eb02c?w=800&auto=format&fit=crop&q=80",
+    "address": "Hosur Main Road, near Electronic City Phase 1 Toll, Ward 192",
+    "location": { "latitude": 12.8465, "longitude": 77.6612 },
+    "citizen": {
+      "name": "Preeti Sen",
+      "phone": "+91 97312 99001",
+      "email": "preeti.sen@example.com",
+      "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=120&auto=format&fit=crop&q=80"
+    },
+    "createdAt": "2026-09-08T07:40:00.000Z",
+    "slaHours": 12,
+    "slaDeadline": "2026-09-08T19:40:00.000Z",
+    "statusHistory": [
+      { "status": "pending", "timestamp": "2026-09-08T07:40:00.000Z", "changedBy": "Citizen", "note": "Accident debris hazard reported." }
+    ]
+  },
+  {
+    "id": "SP-10034",
+    "reportNumber": "#SP-10034",
+    "title": "Open Manhole Missing Heavy Cast Iron Cover",
+    "description": "Uncovered sewer chamber on pedestrian sidewalk near bus stop. Branch stuck in hole by locals as warning sign.",
+    "category": "Drainage Problem",
+    "status": "pending",
+    "priority": "high",
+    "imageUrl": "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&auto=format&fit=crop&q=80",
+    "address": "CMH Road, opposite Metro Pillar 62, Indiranagar, Ward 112",
+    "location": { "latitude": 12.9788, "longitude": 77.6432 },
+    "citizen": {
+      "name": "Manish Gupta",
+      "phone": "+91 98801 44556",
+      "email": "manish.g@example.com",
+      "avatar": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=120&auto=format&fit=crop&q=80"
+    },
+    "createdAt": "2026-09-08T09:00:00.000Z",
+    "slaHours": 6,
+    "slaDeadline": "2026-09-08T15:00:00.000Z",
+    "statusHistory": [
+      { "status": "pending", "timestamp": "2026-09-08T09:00:00.000Z", "changedBy": "Citizen", "note": "Critical fall hazard." }
+    ]
+  },
+  {
+    "id": "SP-10035",
+    "reportNumber": "#SP-10035",
+    "title": "Faded Pedestrian Zebra Crossing Outside Hospital Gate",
+    "description": "Road paint completely worn out. Ambulances and pedestrians struggling to cross due to speeding vehicles.",
+    "category": "Other",
+    "status": "under_review",
+    "priority": "low",
+    "imageUrl": "https://images.unsplash.com/photo-1494783367193-149034c05e8f?w=800&auto=format&fit=crop&q=80",
+    "address": "Victoria Hospital Road, Fort, Ward 139",
+    "location": { "latitude": 12.9612, "longitude": 77.5750 },
+    "citizen": {
+      "name": "Dr. Aniket Roy",
+      "phone": "+91 94490 66778",
+      "email": "aniket.roy@example.com",
+      "avatar": "https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=120&auto=format&fit=crop&q=80"
+    },
+    "createdAt": "2026-09-07T12:00:00.000Z",
+    "slaHours": 72,
+    "slaDeadline": "2026-09-10T12:00:00.000Z",
+    "statusHistory": [
+      { "status": "pending", "timestamp": "2026-09-07T12:00:00.000Z", "changedBy": "Citizen", "note": "Reported." },
+      { "status": "under_review", "timestamp": "2026-09-08T08:30:00.000Z", "changedBy": "Traffic Engineering Cell", "note": "Thermoplastic paint schedule planned." }
+    ]
+  },
+  {
+    "id": "SP-10036",
+    "reportNumber": "#SP-10036",
+    "title": "Illegal Construction Debris Dumped in Public Park Corner",
+    "description": "Truck dumped broken tiles and plaster in public children play area overnight.",
+    "category": "Garbage",
+    "status": "pending",
+    "priority": "medium",
+    "imageUrl": "https://images.unsplash.com/photo-1595278069441-2cf29f8005a4?w=800&auto=format&fit=crop&q=80",
+    "address": "Defence Colony Children Park, Indiranagar, Ward 112",
+    "location": { "latitude": 12.9815, "longitude": 77.6450 },
+    "citizen": {
+      "name": "Shweta Verma",
+      "phone": "+91 98452 33221",
+      "email": "shweta.v@example.com",
+      "avatar": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=120&auto=format&fit=crop&q=80"
+    },
+    "createdAt": "2026-09-08T05:00:00.000Z",
+    "slaHours": 48,
+    "slaDeadline": "2026-09-10T05:00:00.000Z",
+    "statusHistory": [
+      { "status": "pending", "timestamp": "2026-09-08T05:00:00.000Z", "changedBy": "Citizen", "note": "Playground dump reported." }
+    ]
+  },
+  {
+    "id": "SP-10037",
+    "reportNumber": "#SP-10037",
+    "title": "Low Hanging Overhead Cable Tangled in Tree Branches",
+    "description": "Broadband optical fiber cables dangling at head level across footpath after tree branch cracked.",
+    "category": "Other",
+    "status": "approved",
+    "priority": "low",
+    "imageUrl": "https://images.unsplash.com/photo-1473448912268-2022ce9509d8?w=800&auto=format&fit=crop&q=80",
+    "address": "5th Main, Malleshwaram West, Ward 45",
+    "location": { "latitude": 13.0012, "longitude": 77.5620 },
+    "citizen": {
+      "name": "Karthik Rajan",
+      "phone": "+91 97411 00998",
+      "email": "karthik.r@example.com",
+      "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=120&auto=format&fit=crop&q=80"
+    },
+    "createdAt": "2026-09-06T17:00:00.000Z",
+    "slaHours": 72,
+    "slaDeadline": "2026-09-09T17:00:00.000Z",
+    "statusHistory": [
+      { "status": "pending", "timestamp": "2026-09-06T17:00:00.000Z", "changedBy": "Citizen", "note": "Reported." },
+      { "status": "under_review", "timestamp": "2026-09-07T10:00:00.000Z", "changedBy": "Telecom Liaison Desk", "note": "Notice sent to ISP." },
+      { "status": "approved", "timestamp": "2026-09-07T15:00:00.000Z", "changedBy": "Telecom Liaison Desk", "note": "Trimming crew dispatched." }
+    ]
+  },
+  {
+    "id": "SP-10038",
+    "reportNumber": "#SP-10038",
+    "title": "Public Bus Shelter Glass Panel Shattered",
+    "description": "Vandalized bus shelter tempered glass shattered into thousands of shards across seating bench.",
+    "category": "Public Property Damage",
+    "status": "resolved",
+    "priority": "medium",
+    "imageUrl": "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=800&auto=format&fit=crop&q=80",
+    "resolutionImageUrl": "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&auto=format&fit=crop&q=80",
+    "resolutionNote": "Debris completely cleared. New reinforced shatterproof acrylic safety panel installed.",
+    "address": "Opposite Forum Mall, Hosur Road, Koramangala, Ward 151",
+    "location": { "latitude": 12.9340, "longitude": 77.6110 },
+    "citizen": {
+      "name": "Bhavna Mishra",
+      "phone": "+91 99881 22334",
+      "email": "bhavna.m@example.com",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80"
+    },
+    "createdAt": "2026-09-04T12:00:00.000Z",
+    "resolvedAt": "2026-09-06T11:00:00.000Z",
+    "slaHours": 48,
+    "slaDeadline": "2026-09-06T12:00:00.000Z",
+    "statusHistory": [
+      { "status": "pending", "timestamp": "2026-09-04T12:00:00.000Z", "changedBy": "Citizen", "note": "Reported." },
+      { "status": "under_review", "timestamp": "2026-09-04T14:30:00.000Z", "changedBy": "Transit Infrastructure Unit", "note": "Damage inspected." },
+      { "status": "approved", "timestamp": "2026-09-05T09:00:00.000Z", "changedBy": "Transit Infrastructure Unit", "note": "Panel replacement ordered." },
+      { "status": "resolved", "timestamp": "2026-09-06T11:00:00.000Z", "changedBy": "Transit Infrastructure Unit", "note": "Replacement installed and verified." }
+    ]
+  },
+  {
+    "id": "SP-10039",
+    "reportNumber": "#SP-10039",
+    "title": "Clogged Roadside Gutter Cleared Prior to Rainy Season",
+    "description": "Solid silt buildup in concrete roadside gutter causing stagnant water pool.",
+    "category": "Drainage Problem",
+    "status": "resolved",
+    "priority": "low",
+    "imageUrl": "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&auto=format&fit=crop&q=80",
+    "resolutionImageUrl": "https://images.unsplash.com/photo-1584463699039-446dfa6104df?w=800&auto=format&fit=crop&q=80",
+    "resolutionNote": "Desilting machine cleared 50 meters of gutter. Smooth drainage water gradient restored.",
+    "address": "14th Cross, 2nd Block, Jayanagar, Ward 168",
+    "location": { "latitude": 12.9325, "longitude": 77.5875 },
+    "citizen": {
+      "name": "Raghavan N.",
+      "phone": "+91 94481 77665",
+      "email": "raghavan.n@example.com",
+      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80"
+    },
+    "createdAt": "2026-09-03T11:00:00.000Z",
+    "resolvedAt": "2026-09-05T15:00:00.000Z",
+    "slaHours": 72,
+    "slaDeadline": "2026-09-06T11:00:00.000Z",
+    "statusHistory": [
+      { "status": "pending", "timestamp": "2026-09-03T11:00:00.000Z", "changedBy": "Citizen", "note": "Reported." },
+      { "status": "under_review", "timestamp": "2026-09-03T16:00:00.000Z", "changedBy": "Ward Health Inspector", "note": "Desilting list updated." },
+      { "status": "approved", "timestamp": "2026-09-04T10:00:00.000Z", "changedBy": "Ward Health Inspector", "note": "Team assigned." },
+      { "status": "resolved", "timestamp": "2026-09-05T15:00:00.000Z", "changedBy": "Ward Health Inspector", "note": "Cleared." }
+    ]
+  },
+  {
+    "id": "SP-10040",
+    "reportNumber": "#SP-10040",
+    "title": "Broken Stop Sign at Blind Intersection",
+    "description": "Metal regulatory sign sheared off at base after heavy vehicle backing up. Critical junction accident risk.",
+    "category": "Public Property Damage",
+    "status": "under_review",
+    "priority": "high",
+    "imageUrl": "https://images.unsplash.com/photo-1545459720-aac8509eb02c?w=800&auto=format&fit=crop&q=80",
+    "address": "Corner of 10th Cross & 27th Main, Sector 1, HSR Layout, Ward 174",
+    "location": { "latitude": 12.9150, "longitude": 77.6510 },
+    "citizen": {
+      "name": "Ayesha Siddiqui",
+      "phone": "+91 97419 88776",
+      "email": "ayesha.s@example.com",
+      "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120&auto=format&fit=crop&q=80"
+    },
+    "createdAt": "2026-09-07T22:15:00.000Z",
+    "slaHours": 24,
+    "slaDeadline": "2026-09-08T22:15:00.000Z",
+    "statusHistory": [
+      { "status": "pending", "timestamp": "2026-09-07T22:15:00.000Z", "changedBy": "Citizen", "note": "Reported late night." },
+      { "status": "under_review", "timestamp": "2026-09-08T07:00:00.000Z", "changedBy": "Traffic Engineering Section", "note": "Replacement sign post dispatched." }
+    ]
+  }
+]
