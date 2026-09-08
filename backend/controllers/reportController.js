@@ -11,6 +11,7 @@ const {
   transitionReportStatus,
 } = require('../services/reportWorkflowService');
 const { generateWorkOrderPdf } = require('../services/workOrderPdfService');
+const { invalidateCache } = require('../middleware/cache');
 
 // @desc    Create a new civic issue report
 // @route   POST /api/reports
@@ -110,6 +111,9 @@ const createReport = asyncHandler(async (req, res, next) => {
     console.warn('[Report] Non-critical notification error:', notifErr.message);
   }
 
+  invalidateCache('reports');
+  invalidateCache('analytics');
+
   res.status(201).json({
     success: true,
     message: 'Civic issue report created successfully.',
@@ -148,7 +152,8 @@ const getNearbyReports = asyncHandler(async (req, res) => {
   const reports = await Report.find(query)
     .populate('user', 'name email')
     .populate('reviewedBy', 'name email')
-    .limit(limit);
+    .limit(limit)
+    .lean();
 
   res.status(200).json({
     success: true,
@@ -186,7 +191,7 @@ const getMyReports = asyncHandler(async (req, res) => {
   }
 
   const [reports, total] = await Promise.all([
-    Report.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
+    Report.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
     Report.countDocuments(query),
   ]);
 
@@ -258,7 +263,8 @@ const getReports = asyncHandler(async (req, res) => {
       .populate('reviewedBy', 'name email')
       .sort(sort)
       .skip(skip)
-      .limit(limit),
+      .limit(limit)
+      .lean(),
     Report.countDocuments(query),
   ]);
 
@@ -317,6 +323,9 @@ const markUnderReview = asyncHandler(async (req, res) => {
     note: note || 'Issue taken under review by municipal authorities.',
   });
 
+  invalidateCache('reports');
+  invalidateCache('analytics');
+
   res.status(200).json({
     success: true,
     message: 'Report status updated to Under Review.',
@@ -337,6 +346,9 @@ const approveReport = asyncHandler(async (req, res) => {
     user: req.user,
     note,
   });
+
+  invalidateCache('reports');
+  invalidateCache('analytics');
 
   res.status(200).json({
     success: true,
@@ -370,6 +382,9 @@ const rejectReport = asyncHandler(async (req, res) => {
     note: reviewNote.trim(),
   });
 
+  invalidateCache('reports');
+  invalidateCache('analytics');
+
   res.status(200).json({
     success: true,
     message: 'Report has been rejected.',
@@ -395,6 +410,9 @@ const setPriority = asyncHandler(async (req, res) => {
 
   report.priority = priority.toLowerCase();
   await report.save();
+
+  invalidateCache('reports');
+  invalidateCache('analytics');
 
   res.status(200).json({
     success: true,
@@ -469,6 +487,9 @@ const resolveReport = asyncHandler(async (req, res) => {
     throw transErr;
   }
 
+  invalidateCache('reports');
+  invalidateCache('analytics');
+
   res.status(200).json({
     success: true,
     message: 'Report marked as Resolved with proof.',
@@ -534,6 +555,9 @@ const updateReport = asyncHandler(async (req, res) => {
 
   await report.save();
 
+  invalidateCache('reports');
+  invalidateCache('analytics');
+
   res.status(200).json({
     success: true,
     message: 'Report updated successfully.',
@@ -566,26 +590,84 @@ const deleteReport = asyncHandler(async (req, res) => {
   await Notification.deleteMany({ reportId: report._id });
   await report.deleteOne();
 
+  invalidateCache('reports');
+  invalidateCache('analytics');
+
   res.status(200).json({
     success: true,
     message: 'Report and associated records deleted successfully.',
   });
 });
 
-// @desc    Get report stats for dashboard
+// @desc    Batch update report status (Government only)
+// @route   POST /api/reports/batch-status
+// @access  Private (Government only)
+const batchUpdateStatus = asyncHandler(async (req, res) => {
+  const { reportIds, targetStatus, note } = req.body;
+
+  if (!Array.isArray(reportIds) || reportIds.length === 0) {
+    throw new AppError('Please provide an array of report IDs to update.', 400);
+  }
+
+  const allowedStatuses = ['under_review', 'approved'];
+  if (!targetStatus || !allowedStatuses.includes(targetStatus)) {
+    throw new AppError(`Batch updates only allowed for statuses: ${allowedStatuses.join(', ')}`, 400);
+  }
+
+  const results = [];
+  for (const id of reportIds) {
+    try {
+      const report = await transitionReportStatus({
+        reportId: id,
+        targetStatus,
+        user: req.user,
+        note: note || `Batch triage status update to ${targetStatus}`,
+      });
+      results.push({ id, success: true, reportNumber: report.reportNumber, status: report.status });
+    } catch (err) {
+      results.push({ id, success: false, error: err.message });
+    }
+  }
+
+  invalidateCache('reports');
+  invalidateCache('analytics');
+
+  res.status(200).json({
+    success: true,
+    message: `Batch update completed. ${results.filter((r) => r.success).length}/${results.length} succeeded.`,
+    results,
+  });
+});
+
+// @desc    Get report stats for dashboard (Single-roundtrip facet pipeline)
 // @route   GET /api/reports/stats
 // @access  Private
 const getReportStats = asyncHandler(async (req, res) => {
   const query = req.user.role === 'citizen' ? { user: req.user._id } : {};
 
-  const [total, resolved, pending, underReview, approved, rejected] = await Promise.all([
-    Report.countDocuments(query),
-    Report.countDocuments({ ...query, status: 'resolved' }),
-    Report.countDocuments({ ...query, status: 'pending' }),
-    Report.countDocuments({ ...query, status: 'under_review' }),
-    Report.countDocuments({ ...query, status: 'approved' }),
-    Report.countDocuments({ ...query, status: 'rejected' }),
-  ]);
+  const statsPipeline = [
+    ...(Object.keys(query).length > 0 ? [{ $match: query }] : []),
+    {
+      $facet: {
+        total: [{ $count: 'count' }],
+        resolved: [{ $match: { status: 'resolved' } }, { $count: 'count' }],
+        pending: [{ $match: { status: 'pending' } }, { $count: 'count' }],
+        underReview: [{ $match: { status: 'under_review' } }, { $count: 'count' }],
+        approved: [{ $match: { status: 'approved' } }, { $count: 'count' }],
+        rejected: [{ $match: { status: 'rejected' } }, { $count: 'count' }],
+      },
+    },
+  ];
+
+  const [facetResult] = await Report.aggregate(statsPipeline);
+  const extractCount = (arr) => (arr && arr[0] ? arr[0].count : 0);
+
+  const total = extractCount(facetResult?.total);
+  const resolved = extractCount(facetResult?.resolved);
+  const pending = extractCount(facetResult?.pending);
+  const underReview = extractCount(facetResult?.underReview);
+  const approved = extractCount(facetResult?.approved);
+  const rejected = extractCount(facetResult?.rejected);
 
   res.status(200).json({
     success: true,
@@ -642,6 +724,7 @@ module.exports = {
   resolveReport,
   updateReport,
   deleteReport,
+  batchUpdateStatus,
   getReportStats,
   exportReportPdf,
 };

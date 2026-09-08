@@ -13,11 +13,13 @@ const {
   resolveReport,
   updateReport,
   deleteReport,
+  batchUpdateStatus,
   getReportStats,
   exportReportPdf,
 } = require('../controllers/reportController');
 const { protect, requireRole } = require('../middleware/auth');
 const upload = require('../middleware/upload');
+const { cacheResponse } = require('../middleware/cache');
 const {
   validateReportInput,
   validateNearbyInput,
@@ -30,9 +32,12 @@ router.use(protect);
 // Geospatial issue discovery near coordinates
 router.get('/nearby', validateNearbyInput, getNearbyReports);
 
-// Citizen queue & statistics
+// Citizen queue & statistics (cached for 15s)
 router.get('/mine', sanitizePagination, getMyReports);
-router.get('/stats', getReportStats);
+router.get('/stats', cacheResponse(15, ['reports']), getReportStats);
+
+// Batch triage operations (Government only)
+router.post('/batch-status', requireRole('government'), batchUpdateStatus);
 
 // Main report creation & triage queue
 router.route('/')

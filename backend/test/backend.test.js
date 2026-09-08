@@ -324,4 +324,71 @@ test('SpotFix Backend Automated Suite', async (t) => {
     assert.ok(res.headers['content-disposition'].includes('work-order-'));
     assert.ok(typeof res.data === 'string' && res.data.startsWith('%PDF-'));
   });
+
+  await t.test('17. Interactive OpenAPI Specification & Swagger UI (200) + X-Request-Id', async () => {
+    const docsJson = await jsonRequest('GET', '/api/docs/json');
+    assert.strictEqual(docsJson.status, 200);
+    assert.strictEqual(docsJson.data.openapi, '3.0.3');
+    assert.ok(docsJson.headers['x-request-id']);
+
+    const docsHtml = await jsonRequest('GET', '/api/docs');
+    assert.strictEqual(docsHtml.status, 200);
+    assert.ok(docsHtml.headers['content-type'].includes('text/html'));
+    assert.ok(typeof docsHtml.data === 'string' && docsHtml.data.includes('SwaggerUIBundle'));
+  });
+
+  await t.test('18. User Profile & Push Notification Token Registration (200)', async () => {
+    const updateRes = await jsonRequest('PUT', '/api/auth/profile', { name: 'Verified Citizen Name' }, citizenToken);
+    assert.strictEqual(updateRes.status, 200);
+    assert.strictEqual(updateRes.data.user.name, 'Verified Citizen Name');
+
+    const pushRes = await jsonRequest('POST', '/api/auth/push-token', { pushToken: 'ExponentPushToken[unit-test-token]' }, citizenToken);
+    assert.strictEqual(pushRes.status, 200);
+    assert.strictEqual(pushRes.data.success, true);
+  });
+
+  await t.test('19. Single-Roundtrip Facet Stats Aggregation (200)', async () => {
+    const statsRes = await jsonRequest('GET', '/api/reports/stats', null, citizenToken);
+    assert.strictEqual(statsRes.status, 200);
+    assert.strictEqual(statsRes.data.success, true);
+    assert.ok(typeof statsRes.data.stats.total === 'number');
+    assert.ok(typeof statsRes.data.stats.resolved === 'number');
+    assert.ok(typeof statsRes.data.stats.pending === 'number');
+  });
+
+  await t.test('20. In-Memory TTL Caching & ETag Response Headers', async () => {
+    // Initial request triggers cache MISS or HIT
+    const req1 = await jsonRequest('GET', '/api/reports/stats', null, citizenToken);
+    assert.strictEqual(req1.status, 200);
+    assert.ok(req1.headers['x-cache']);
+
+    // Second request should serve from cache
+    const req2 = await jsonRequest('GET', '/api/reports/stats', null, citizenToken);
+    assert.strictEqual(req2.status, 200);
+    assert.ok(req2.headers['etag']);
+  });
+
+  await t.test('21. Government Multi-Report Batch Triage (200)', async () => {
+    // Create candidate report
+    const newReport = await jsonRequest('POST', '/api/reports', {
+      title: 'Batch Triage Test Report',
+      description: 'Candidate for municipal batch status update pipeline.',
+      category: 'Pothole',
+      latitude: 12.9716,
+      longitude: 77.5946,
+      address: 'MG Road, Bangalore',
+    }, citizenToken);
+    assert.strictEqual(newReport.status, 201);
+    const id = newReport.data.report._id;
+
+    // Batch update to under_review
+    const batchRes = await jsonRequest('POST', '/api/reports/batch-status', {
+      reportIds: [id],
+      targetStatus: 'under_review',
+      note: 'Morning shift batch triage.',
+    }, govToken);
+    assert.strictEqual(batchRes.status, 200);
+    assert.strictEqual(batchRes.data.success, true);
+    assert.strictEqual(batchRes.data.results[0].status, 'under_review');
+  });
 });

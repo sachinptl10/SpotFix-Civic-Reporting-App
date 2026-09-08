@@ -12,6 +12,8 @@ const {
   configureMongoSanitize,
   apiLimiter,
 } = require('./middleware/security');
+const requestIdMiddleware = require('./middleware/requestId');
+const { router: openapiRouter } = require('./docs/openapi');
 
 // Load environment variables
 dotenv.config();
@@ -24,18 +26,27 @@ const app = express();
 // Trust reverse proxy if running behind Nginx / Heroku / AWS ALB
 app.set('trust proxy', 1);
 
+// Attach Request ID correlation to every request
+app.use(requestIdMiddleware);
+
 // 1. HTTP Security Headers
 app.use(configureHelmet());
 
 // 2. CORS policy enforcement
 app.use(configureCors());
 
-// 3. HTTP Request Logging
+// 3. HTTP Request Logging with Request ID correlation
 if (process.env.NODE_ENV !== 'test') {
+  morgan.token('id', (req) => req.id ? `[${req.id.slice(0, 8)}]` : '');
   app.use(
-    morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev', {
-      skip: (req) => req.originalUrl === '/api/health', // Don't clutter logs with health checks
-    })
+    morgan(
+      process.env.NODE_ENV === 'production'
+        ? ':id :remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length]'
+        : ':id :method :url :status :response-time ms - :res[content-length]',
+      {
+        skip: (req) => req.originalUrl === '/api/health', // Don't clutter logs with health checks
+      }
+    )
   );
 }
 
@@ -93,6 +104,10 @@ app.get('/api/health/diagnostics', async (req, res) => {
   });
 });
 
+// Interactive API Documentation & OpenAPI Specification
+app.use('/api/docs', openapiRouter);
+app.get('/docs', (req, res) => res.redirect('/api/docs'));
+
 // Mount route handlers
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/reports', require('./routes/reportRoutes'));
@@ -117,6 +132,7 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   logger.info(`[SpotFix API V2] Server listening on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
   logger.info(`[SpotFix API V2] Health endpoint: http://localhost:${PORT}/api/health`);
   logger.info(`[SpotFix API V2] Diagnostics endpoint: http://localhost:${PORT}/api/health/diagnostics`);
+  logger.info(`[SpotFix API V2] Interactive API Docs: http://localhost:${PORT}/api/docs`);
 });
 
 // Handle unhandled promise rejections
