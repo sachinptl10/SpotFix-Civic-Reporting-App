@@ -1,4 +1,6 @@
 const path = require('path');
+const fs = require('fs');
+const crypto = require('crypto');
 const Report = require('../models/Report');
 const Notification = require('../models/Notification');
 const AppError = require('../utils/AppError');
@@ -17,13 +19,41 @@ const createReport = asyncHandler(async (req, res, next) => {
   const { title, description, category, latitude, longitude, address } = req.body;
 
   let imageUrl = '';
-  let mediaType = 'image';
+  let mediaType = req.body.mediaType || 'image';
+  let createdLocalFilename = null;
 
   if (req.file) {
     imageUrl = `/uploads/${req.file.filename}`;
     if (req.file.mimetype.startsWith('video/')) {
       mediaType = 'video';
     }
+  } else if (req.body.imageBase64) {
+    try {
+      const raw = req.body.imageBase64;
+      const base64Data = raw.replace(/^data:([A-Za-z-+\/]+);base64,/, '');
+      const match = raw.match(/^data:([A-Za-z-+\/]+);base64,/);
+      let ext = 'jpg';
+      if (match && match[1]) {
+        if (match[1].includes('png')) ext = 'png';
+        else if (match[1].includes('webp')) ext = 'webp';
+        else if (match[1].includes('mp4')) ext = 'mp4';
+      }
+      const filename = `spotfix-${Date.now()}-${crypto.randomBytes(4).toString('hex')}.${ext}`;
+      const uploadDir = path.resolve(__dirname, '..', 'uploads');
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+      fs.writeFileSync(path.join(uploadDir, filename), Buffer.from(base64Data, 'base64'));
+      imageUrl = `/uploads/${filename}`;
+      createdLocalFilename = filename;
+      if (ext === 'mp4' || mediaType === 'video') {
+        mediaType = 'video';
+      }
+    } catch (b64Err) {
+      console.warn('[Report] Failed to write base64 image:', b64Err.message);
+    }
+  } else if (req.body.imageUrl) {
+    imageUrl = req.body.imageUrl;
   }
 
   // Generate unique human-readable report identifier (#SP-XXXXX)
@@ -60,6 +90,9 @@ const createReport = asyncHandler(async (req, res, next) => {
   } catch (createErr) {
     if (req.file) {
       await safeDeleteUploadFile(req.file.filename);
+    }
+    if (createdLocalFilename) {
+      await safeDeleteUploadFile(createdLocalFilename);
     }
     throw createErr;
   }
@@ -384,21 +417,57 @@ const resolveReport = asyncHandler(async (req, res) => {
     });
   }
 
-  if (!req.file) {
+  let resolvedImageUrl = '';
+  let createdResolvedFilename = null;
+
+  if (req.file) {
+    resolvedImageUrl = `/uploads/${req.file.filename}`;
+  } else if (req.body.resolvedImageBase64) {
+    try {
+      const raw = req.body.resolvedImageBase64;
+      const base64Data = raw.replace(/^data:([A-Za-z-+\/]+);base64,/, '');
+      const match = raw.match(/^data:([A-Za-z-+\/]+);base64,/);
+      let ext = 'jpg';
+      if (match && match[1]) {
+        if (match[1].includes('png')) ext = 'png';
+        else if (match[1].includes('webp')) ext = 'webp';
+      }
+      const filename = `spotfix-resolved-${Date.now()}-${crypto.randomBytes(4).toString('hex')}.${ext}`;
+      const uploadDir = path.resolve(__dirname, '..', 'uploads');
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+      fs.writeFileSync(path.join(uploadDir, filename), Buffer.from(base64Data, 'base64'));
+      resolvedImageUrl = `/uploads/${filename}`;
+      createdResolvedFilename = filename;
+    } catch (b64Err) {
+      console.warn('[Report] Failed to write resolved base64 image:', b64Err.message);
+    }
+  } else if (req.body.resolvedImageUrl) {
+    resolvedImageUrl = req.body.resolvedImageUrl;
+  }
+
+  if (!resolvedImageUrl) {
     throw new AppError('Resolution proof photograph is required.', 422, {
       resolvedImage: 'Please upload a photo proving the issue has been resolved.',
     });
   }
 
-  const resolvedImageUrl = `/uploads/${req.file.filename}`;
-
-  const report = await transitionReportStatus({
-    reportId: req.params.id,
-    targetStatus: 'resolved',
-    user: req.user,
-    note: finalNote,
-    extraFields: { resolvedImageUrl },
-  });
+  let report;
+  try {
+    report = await transitionReportStatus({
+      reportId: req.params.id,
+      targetStatus: 'resolved',
+      user: req.user,
+      note: finalNote,
+      extraFields: { resolvedImageUrl },
+    });
+  } catch (transErr) {
+    if (createdResolvedFilename) {
+      await safeDeleteUploadFile(createdResolvedFilename);
+    }
+    throw transErr;
+  }
 
   res.status(200).json({
     success: true,
@@ -436,6 +505,31 @@ const updateReport = asyncHandler(async (req, res) => {
     }
     report.imageUrl = `/uploads/${req.file.filename}`;
     report.mediaType = req.file.mimetype.startsWith('video/') ? 'video' : 'image';
+  } else if (req.body.imageBase64) {
+    try {
+      const raw = req.body.imageBase64;
+      const base64Data = raw.replace(/^data:([A-Za-z-+\/]+);base64,/, '');
+      const match = raw.match(/^data:([A-Za-z-+\/]+);base64,/);
+      let ext = 'jpg';
+      if (match && match[1]) {
+        if (match[1].includes('png')) ext = 'png';
+        else if (match[1].includes('webp')) ext = 'webp';
+        else if (match[1].includes('mp4')) ext = 'mp4';
+      }
+      const filename = `spotfix-${Date.now()}-${crypto.randomBytes(4).toString('hex')}.${ext}`;
+      const uploadDir = path.resolve(__dirname, '..', 'uploads');
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+      fs.writeFileSync(path.join(uploadDir, filename), Buffer.from(base64Data, 'base64'));
+      if (report.imageUrl) {
+        await safeDeleteUploadFile(path.basename(report.imageUrl));
+      }
+      report.imageUrl = `/uploads/${filename}`;
+      report.mediaType = req.body.mediaType || (ext === 'mp4' ? 'video' : 'image');
+    } catch (b64Err) {
+      console.warn('[Report] Failed to write updated base64 image:', b64Err.message);
+    }
   }
 
   await report.save();

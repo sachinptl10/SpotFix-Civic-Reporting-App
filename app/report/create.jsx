@@ -38,6 +38,7 @@ export default function CreateReportScreen() {
 
   // Attached Media State (Reactive & Updatable in Form)
   const [currentImageUri, setCurrentImageUri] = useState(params.imageUri || '');
+  const [currentImageBase64, setCurrentImageBase64] = useState(params.imageBase64 || '');
   const [currentMediaType, setCurrentMediaType] = useState(params.mediaType || 'image');
   const [isPickerActive, setIsPickerActive] = useState(false);
 
@@ -45,10 +46,11 @@ export default function CreateReportScreen() {
   useEffect(() => {
     if (params.imageUri && params.imageUri !== currentImageUri) {
       setCurrentImageUri(params.imageUri);
+      setCurrentImageBase64(params.imageBase64 || '');
       setCurrentMediaType(params.mediaType || 'image');
       setErrors((prev) => ({ ...prev, image: null }));
     }
-  }, [params.imageUri, params.mediaType]);
+  }, [params.imageUri, params.imageBase64, params.mediaType]);
 
   // Form Fields
   const [title, setTitle] = useState('');
@@ -158,9 +160,16 @@ export default function CreateReportScreen() {
         allowsEditing: true,
         quality: 0.85,
         mediaTypes: ['images'],
+        base64: true,
       });
       if (!result.canceled && result.assets && result.assets.length > 0) {
-        setCurrentImageUri(result.assets[0].uri);
+        const asset = result.assets[0];
+        setCurrentImageUri(asset.uri);
+        if (asset.base64) {
+          setCurrentImageBase64(`data:image/jpeg;base64,${asset.base64}`);
+        } else {
+          setCurrentImageBase64('');
+        }
         setCurrentMediaType('image');
         setErrors((prev) => ({ ...prev, image: null }));
         toast.showSuccess('Photograph attached successfully!');
@@ -182,10 +191,16 @@ export default function CreateReportScreen() {
         mediaTypes: ['images', 'videos'],
         allowsEditing: true,
         quality: 0.85,
+        base64: true,
       });
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const asset = result.assets[0];
         setCurrentImageUri(asset.uri);
+        if (asset.base64) {
+          setCurrentImageBase64(`data:${asset.type === 'video' ? 'video/mp4' : 'image/jpeg'};base64,${asset.base64}`);
+        } else {
+          setCurrentImageBase64('');
+        }
         setCurrentMediaType(asset.type === 'video' ? 'video' : 'image');
         setErrors((prev) => ({ ...prev, image: null }));
         toast.showSuccess('Media attached from library!');
@@ -200,6 +215,7 @@ export default function CreateReportScreen() {
 
   const handleRemovePhoto = () => {
     setCurrentImageUri('');
+    setCurrentImageBase64('');
     setCurrentMediaType('image');
   };
 
@@ -266,6 +282,7 @@ export default function CreateReportScreen() {
         longitude: location?.longitude || 0,
         address: address || `${(location?.latitude || 0).toFixed(5)}, ${(location?.longitude || 0).toFixed(5)}`,
         imageUri: currentImageUri || '',
+        imageBase64: currentImageBase64 || '',
         mediaType: currentMediaType || 'image',
       });
 

@@ -169,6 +169,72 @@ export const removeAuthToken = async () => {
 };
 
 /**
+ * Uploads FormData via React Native's XMLHttpRequest to bypass Expo WinterCG fetch polyfill
+ */
+const uploadViaXHR = (url, options = {}, headers = {}, host = '') => {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    const method = (options.method || 'POST').toUpperCase();
+    xhr.open(method, url, true);
+
+    // Set request headers (excluding Content-Type to let native RCTNetworking set boundary)
+    Object.keys(headers || {}).forEach((key) => {
+      if (key.toLowerCase() !== 'content-type') {
+        try {
+          xhr.setRequestHeader(key, headers[key]);
+        } catch (e) {
+          // Ignore header setting error if any
+        }
+      }
+    });
+
+    xhr.onload = () => {
+      let data = null;
+      try {
+        data = JSON.parse(xhr.responseText);
+      } catch (e) {
+        data = xhr.responseText ? { message: xhr.responseText } : null;
+      }
+
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve(data);
+      } else {
+        if (xhr.status === 401 && !options.skipAuth) {
+          removeAuthToken();
+          if (typeof unauthorizedListener === 'function') {
+            unauthorizedListener();
+          }
+        }
+        const error = new Error(data?.message || `Upload failed with status ${xhr.status}`);
+        error.status = xhr.status;
+        error.response = data;
+        error.errors = data?.errors || null;
+        reject(error);
+      }
+    };
+
+    xhr.onerror = () => {
+      const netError = new Error(
+        `Cannot reach the SpotFix server at ${host}. Please ensure your device and computer are connected to the same Wi-Fi / Hotspot network.`
+      );
+      netError.isNetworkError = true;
+      netError.serverHost = host;
+      reject(netError);
+    };
+
+    xhr.ontimeout = () => {
+      const timeError = new Error('Request timed out while uploading media. Please check your network connection.');
+      timeError.isNetworkError = true;
+      timeError.serverHost = host;
+      reject(timeError);
+    };
+
+    xhr.timeout = 60000;
+    xhr.send(options.body);
+  });
+};
+
+/**
  * Central API request handler with automatic token injection & 401 handling
  */
 export const apiRequest = async (endpoint, options = {}) => {
@@ -213,6 +279,11 @@ export const apiRequest = async (endpoint, options = {}) => {
 
   if (options.body && !isFormData && typeof options.body === 'object') {
     fetchOptions.body = JSON.stringify(options.body);
+  }
+
+  // If isFormData on native device, use XMLHttpRequest to bypass Expo's WinterCG convertFormDataAsync
+  if (isFormData && Platform.OS !== 'web' && typeof XMLHttpRequest !== 'undefined') {
+    return await uploadViaXHR(url, fetchOptions, headers, host);
   }
 
   try {

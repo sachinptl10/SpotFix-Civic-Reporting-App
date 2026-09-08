@@ -30,7 +30,7 @@ export const detectDevServerHost = () => {
     console.warn('[Constants] Failed to auto-detect host IP:', err);
   }
 
-  return 'http://172.20.10.2:5000';
+  return 'http://192.168.1.89:5000';
 };
 
 export const SERVER_HOST = detectDevServerHost();
